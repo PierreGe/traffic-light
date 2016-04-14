@@ -3,4 +3,4 @@
 /*
 
 */
-E[] not( (TrafficLightLeftRight.Green and TrafficLightFrontBack.Green) or (TrafficLightLeftRight.Green and CrosswalkLeftRight.Green) or (CrosswalkLeftRight.Green and TrafficLightFrontBack.Green)  )
+control: A[] not( (TrafficLightLeftRight.Green and TrafficLightFrontBack.Green) or (TrafficLightLeftRight.Green and Crosswalk.Green) or (Crosswalk.Green and TrafficLightFrontBack.Green))

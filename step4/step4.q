@@ -16,6 +16,11 @@ Check if all states verify the follow proprety: If the crosswalk is waiting to b
 control : A[] not ( (TrafficLightFrontBack.Green and TrafficLightLeftRight.Crosswalk and Crosswalk.Waiting) or (TrafficLightLeftRight.Green and TrafficLightFrontBack.Crosswalk and Crosswalk.Waiting) )
 
 /*
+
+*/
+ A[] not deadlock
+
+/*
 Check if all states verify the proprety : The two traffic lights cannot be green at the same time or the crosswalk and one of the traffic light cannot be green too
 */
 control : A[] not( (TrafficLightLeftRight.Green and TrafficLightFrontBack.Green) or (TrafficLightLeftRight.Green and Crosswalk.Green) or (Crosswalk.Green and TrafficLightFrontBack.Green))

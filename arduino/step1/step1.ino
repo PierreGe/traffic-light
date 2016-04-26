@@ -9,23 +9,25 @@ const short FRONT_BOTTOM_RED = 10;
 const short FRONT_BOTTOM_GREEN = 9;
 
 
+const int delay = 1000;
+
 //  -- enum state of crosslights
-enum VTLState { GREEN, RED };
+enum VehicleTrafficLightState { GREEN, RED };
 
 typedef struct VehicleTrafficLight
 {
-    VTLState state; 
-};
+    VehicleTrafficLightState state; 
+} 
 
-VehicleTrafficLight TLLR, TLFB;
+VehicleTrafficLight trafficLightLeftRight, trafficLightFrontBack;
 
 void initialState() {
-    TLLR.state = GREEN;
-    TLFB.state = RED;
+    trafficLightLeftRight.state = GREEN;
+    trafficLightFrontBack.state = RED;
 }
 
 bool verifier() {
-  if (TLLR.state==GREEN && TLFB.state==GREEN){
+  if (trafficLightLeftRight.state==GREEN && trafficLightFrontBack.state==GREEN){
     return 0;
   }
   if (LEFT_RIGHT_GREEN==HIGH && FRONT_BOTTOM_GREEN==HIGH){
@@ -45,32 +47,55 @@ void setup() {
   initialState(); 
 }
 
+void alertState() {
+  digitalWrite(ALERT_STATE, HIGH);
+  digitalWrite(LEFT_RIGHT_RED, LOW);
+  digitalWrite(LEFT_RIGHT_GREEN, LOW);
+  digitalWrite(FRONT_BOTTOM_RED, LOW);
+  digitalWrite(FRONT_BOTTOM_GREEN, LOW);
+}
+
+void trafficLightLeftRightFromGreenToRed() {
+  trafficLightLeftRight.state = RED;
+  digitalWrite(LEFT_RIGHT_RED, HIGH);
+  digitalWrite(LEFT_RIGHT_GREEN, LOW);
+}
+
+void trafficLightLeftRightFromRedToGreen() {
+  trafficLightLeftRight.state = GREEN;
+  digitalWrite(LEFT_RIGHT_RED, LOW);
+  digitalWrite(LEFT_RIGHT_GREEN, HIGH);
+}
+
+void trafficLightFrontBackFromGreenToRed() {
+  trafficLightFrontBack.state = RED;
+  digitalWrite(FRONT_BOTTOM_RED, HIGH);
+  digitalWrite(FRONT_BOTTOM_GREEN, LOW);
+}
+
+void trafficLightFrontBackFromRedToGreen() {
+  trafficLightFrontBack.state = GREEN;
+  digitalWrite(FRONT_BOTTOM_RED, LOW);
+  digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
+}
+
 // the loop function runs over and over again forever
 void loop() {
-  delay(1000); 
+  delay(delay); 
 
-  if (TLLR.state == GREEN){
-    TLLR.state = RED;
-    TLFB.state = GREEN;
-    digitalWrite(LEFT_RIGHT_RED, HIGH);
-    digitalWrite(LEFT_RIGHT_GREEN, LOW);
-    digitalWrite(FRONT_BOTTOM_RED, LOW);
-    digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
+  if (trafficLightLeftRight.state == GREEN){
+    trafficLightLeftRightFromGreenToRed();
+  } else {
+    trafficLightLeftRightFromRedToGreen()
   }
-  else{
-    TLFB.state = RED;
-    TLLR.state = GREEN;
-    digitalWrite(LEFT_RIGHT_RED, LOW);
-    digitalWrite(FRONT_BOTTOM_RED, HIGH);
-    digitalWrite(FRONT_BOTTOM_GREEN, LOW);
-    digitalWrite(LEFT_RIGHT_GREEN, HIGH);
+
+  if (trafficLightFrontBack.state == GREEN){
+    trafficLightFrontBackFromGreenToRed();
+  } else {
+    trafficLightFrontBackFromRedToGreen()
   }
   
   if (!verifier()) {
-    digitalWrite(ALERT_STATE, HIGH);
-    digitalWrite(LEFT_RIGHT_RED, LOW);
-    digitalWrite(LEFT_RIGHT_GREEN, LOW);
-    digitalWrite(FRONT_BOTTOM_RED, LOW);
-    digitalWrite(FRONT_BOTTOM_GREEN, LOW);
+    alertState();
   }
 }

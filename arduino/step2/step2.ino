@@ -1,0 +1,131 @@
+
+
+//  Enum state of crosslights
+enum VehicleTrafficLightState { V_GREEN, V_RED, V_CROSSWALK };
+enum CrosswalkTrafficLightState { C_GREEN, C_RED, C_FREE, C_CALLED, C_WAITING};
+
+typedef struct VehicleTrafficLight
+{
+    VehicleTrafficLightState state;
+};
+
+typedef struct CrosswalkTrafficLight
+{
+    CrosswalkTrafficLightState state;
+};
+
+// define PIN
+
+const short ALERT_STATE = 13;
+const short LEFT_RIGHT_RED = 12;
+const short LEFT_RIGHT_GREEN = 11;
+const short FRONT_BOTTOM_RED = 10;
+const short FRONT_BOTTOM_GREEN = 9;
+const byte CROSSWALK_BUTTON = 2;
+
+
+const int period = 1000;
+
+VehicleTrafficLight trafficLightLeftRight, trafficLightFrontBack;
+CrosswalkTrafficLight crosswalk;
+
+void initialState() {
+    trafficLightLeftRight.state = V_GREEN;
+    trafficLightFrontBack.state = V_RED;
+    crosswalk.state= C_RED;
+}
+
+bool verifier() {
+    if (trafficLightLeftRight.state==V_GREEN && trafficLightFrontBack.state==V_GREEN){
+        return 0;
+    }
+    if (LEFT_RIGHT_GREEN==HIGH && FRONT_BOTTOM_GREEN==HIGH){
+        return 0;
+    }
+    return 1;
+}
+
+// the setup function runs once when you press reset or power the board
+void setup(){
+    // initialize digital pin 13 as an output.
+    pinMode(ALERT_STATE, OUTPUT);
+    pinMode(LEFT_RIGHT_RED, OUTPUT);
+    pinMode(LEFT_RIGHT_GREEN, OUTPUT);
+    pinMode(FRONT_BOTTOM_RED, OUTPUT);
+    pinMode(FRONT_BOTTOM_GREEN, OUTPUT);
+    //pinMode(CROSSWALK_GREEN,OUTPUT);
+    //pinMode(CROSSWALK_RED,OUTPUT);
+    pinMode(CROSSWALK_BUTTON,INPUT_PULLUP);
+    attachInterrupt(CROSSWALK_BUTTON,crosswalkCall,CHANGE);
+    initialState();
+}
+
+void alertState(){
+    digitalWrite(ALERT_STATE, HIGH);
+    digitalWrite(LEFT_RIGHT_RED, LOW);
+    digitalWrite(LEFT_RIGHT_GREEN, LOW);
+    digitalWrite(FRONT_BOTTOM_RED, LOW);
+    digitalWrite(FRONT_BOTTOM_GREEN, LOW);
+    //digitalWrite(CROSSWALK_GREEN,LOW);
+    //digitalWrite(CROSSWALK_RED,LOW);
+}
+
+void trafficLightLeftRightFromGreenToRed() {
+    trafficLightLeftRight.state = V_RED;
+    digitalWrite(LEFT_RIGHT_RED, HIGH);
+    digitalWrite(LEFT_RIGHT_GREEN, LOW);
+}
+
+void trafficLightLeftRightFromRedToGreen() {
+    trafficLightLeftRight.state = V_GREEN;
+    digitalWrite(LEFT_RIGHT_RED, LOW);
+    digitalWrite(LEFT_RIGHT_GREEN, HIGH);
+}
+
+void trafficLightFrontBackFromGreenToRed() {
+    trafficLightFrontBack.state = V_RED;
+    digitalWrite(FRONT_BOTTOM_RED, HIGH);
+    digitalWrite(FRONT_BOTTOM_GREEN, LOW);
+}
+
+void trafficLightFrontBackFromRedToGreen() {
+    trafficLightFrontBack.state = V_GREEN;
+    digitalWrite(FRONT_BOTTOM_RED, LOW);
+    digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
+}
+
+void crosswalkCall(){
+  digitalWrite(ALERT_STATE,HIGH);
+}
+
+
+
+
+// the loop function runs over and over again forever
+void loop() {
+    delay(period);
+
+    if (trafficLightLeftRight.state == V_GREEN){
+        trafficLightLeftRightFromGreenToRed();
+    }
+    else {
+        trafficLightLeftRightFromRedToGreen();
+    }
+
+    if (trafficLightFrontBack.state == V_GREEN){
+        trafficLightFrontBackFromGreenToRed();
+    }
+    else {
+        trafficLightFrontBackFromRedToGreen();
+    }
+
+    if (!verifier()) {
+        alertState();
+    }
+}
+
+
+
+
+
+

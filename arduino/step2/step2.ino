@@ -21,10 +21,13 @@ const short LEFT_RIGHT_RED = 12;
 const short LEFT_RIGHT_GREEN = 11;
 const short FRONT_BOTTOM_RED = 10;
 const short FRONT_BOTTOM_GREEN = 9;
+const byte CROSSWALK_RED = 7;
+const byte CROSSWALK_GREEN = 6;
+const byte CROSSWALK_CALL = 5;
 const byte CROSSWALK_BUTTON = 2;
 
-
-const int period = 1000;
+const int period = 4000;
+bool prec;
 
 VehicleTrafficLight trafficLightLeftRight, trafficLightFrontBack;
 CrosswalkTrafficLight crosswalk;
@@ -32,7 +35,7 @@ CrosswalkTrafficLight crosswalk;
 void initialState() {
     trafficLightLeftRight.state = V_GREEN;
     trafficLightFrontBack.state = V_RED;
-    crosswalk.state= C_RED;
+    crosswalk.state = C_RED;
 }
 
 bool verifier() {
@@ -53,10 +56,11 @@ void setup(){
     pinMode(LEFT_RIGHT_GREEN, OUTPUT);
     pinMode(FRONT_BOTTOM_RED, OUTPUT);
     pinMode(FRONT_BOTTOM_GREEN, OUTPUT);
-    //pinMode(CROSSWALK_GREEN,OUTPUT);
-    //pinMode(CROSSWALK_RED,OUTPUT);
-    pinMode(CROSSWALK_BUTTON,INPUT_PULLUP);
-    attachInterrupt(CROSSWALK_BUTTON,crosswalkCall,CHANGE);
+    pinMode(CROSSWALK_CALL, OUTPUT);
+    pinMode(CROSSWALK_GREEN,OUTPUT);
+    pinMode(CROSSWALK_RED,OUTPUT);
+    pinMode(CROSSWALK_BUTTON,INPUT);
+    attachInterrupt(digitalPinToInterrupt(CROSSWALK_BUTTON),crosswalkCall,CHANGE);
     initialState();
 }
 
@@ -66,9 +70,12 @@ void alertState(){
     digitalWrite(LEFT_RIGHT_GREEN, LOW);
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, LOW);
-    //digitalWrite(CROSSWALK_GREEN,LOW);
-    //digitalWrite(CROSSWALK_RED,LOW);
+    digitalWrite(CROSSWALK_CALL, LOW);
+    digitalWrite(CROSSWALK_GREEN, LOW);
+    digitalWrite(CROSSWALK_RED, LOW);
 }
+
+// ================ TRAFFIC LIGHT LEFT RIGHT ================
 
 void trafficLightLeftRightFromGreenToRed() {
     trafficLightLeftRight.state = V_RED;
@@ -82,6 +89,23 @@ void trafficLightLeftRightFromRedToGreen() {
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
 }
 
+void trafficLightLeftRightFromRedToCrosswalk() {
+  trafficLightLeftRight.state = V_CROSSWALK;
+  prec = true;
+}
+
+void trafficLightLeftRightFromCrosswalkToGreen() {
+  trafficLightLeftRight.state = V_GREEN;
+  digitalWrite(LEFT_RIGHT_RED, LOW);
+  digitalWrite(LEFT_RIGHT_GREEN, HIGH);
+}
+
+void trafficLightLeftRightFromCrosswalkToRed() {
+  trafficLightLeftRight.state = V_RED;
+}
+
+// ================ TRAFFIC LIGHT FRONT BACK ================
+
 void trafficLightFrontBackFromGreenToRed() {
     trafficLightFrontBack.state = V_RED;
     digitalWrite(FRONT_BOTTOM_RED, HIGH);
@@ -94,10 +118,66 @@ void trafficLightFrontBackFromRedToGreen() {
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
-void crosswalkCall(){
-  digitalWrite(ALERT_STATE,HIGH);
+void trafficLightFrontBackFromCrosswalkToGreen() {
+  trafficLightFrontBack.state = V_GREEN;
+  digitalWrite(FRONT_BOTTOM_RED, LOW);
+  digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
+void trafficLightFrontBackFromCrosswalkToRed() {
+  trafficLightFrontBack.state = V_RED;
+}
+
+void trafficLightFrontBackFromRedToCrosswalk() {
+  trafficLightFrontBack.state = V_CROSSWALK;
+  prec = false;
+}
+
+// ======================== CROSSWALK ========================
+
+void crosswalkCall(){
+  if (crosswalk.state == C_RED) {
+    crosswalkCallFromRedToCalled();
+    if (trafficLightFrontBack.state == V_RED) {
+      trafficLightFrontBackFromRedToCrosswalk();
+    }
+    if (trafficLightLeftRight.state == V_RED) {
+      trafficLightLeftRightFromRedToCrosswalk();
+    }
+  }
+}
+
+void crosswalkCallFromRedToCalled() {
+  crosswalk.state = C_CALLED;
+  digitalWrite(CROSSWALK_CALL,HIGH);
+
+}
+
+void crosswalkFromCalledToGreen() {
+  if (trafficLightFrontBack.state == V_RED) {
+    trafficLightFrontBackFromRedToCrosswalk();
+  }
+  if (trafficLightLeftRight.state == V_RED) {
+    trafficLightLeftRightFromRedToCrosswalk();
+  }
+  crosswalk.state = C_GREEN;
+  digitalWrite(CROSSWALK_GREEN,HIGH);
+  digitalWrite(CROSSWALK_RED,LOW);
+  digitalWrite(CROSSWALK_CALL,LOW);
+}
+
+void crosswalkFromGreenToRed() {
+  crosswalk.state = C_RED;
+  digitalWrite(CROSSWALK_GREEN,LOW);
+  digitalWrite(CROSSWALK_RED,HIGH);
+  if ( prec == true ) {
+    trafficLightFrontBackFromCrosswalkToGreen();
+    trafficLightLeftRightFromCrosswalkToRed();
+  } else { // prec == false
+    trafficLightFrontBackFromCrosswalkToRed();
+    trafficLightLeftRightFromCrosswalkToGreen();
+  }
+}
 
 
 
@@ -108,17 +188,23 @@ void loop() {
     if (trafficLightLeftRight.state == V_GREEN){
         trafficLightLeftRightFromGreenToRed();
     }
-    else {
+    else if (trafficLightLeftRight.state == V_RED) {
         trafficLightLeftRightFromRedToGreen();
     }
 
     if (trafficLightFrontBack.state == V_GREEN){
         trafficLightFrontBackFromGreenToRed();
     }
-    else {
+    else if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToGreen();
     }
 
+    if (crosswalk.state == C_CALLED) {
+      crosswalkFromCalledToGreen();
+    } else if (crosswalk.state == C_GREEN) {
+      crosswalkFromGreenToRed();
+    }
+    
     if (!verifier()) {
         alertState();
     }

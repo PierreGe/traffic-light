@@ -3,4 +3,14 @@
 /*
 
 */
+control_t*(Controler.P,0): A<> TrafficLightLeftRight.Red and TrafficLightFrontBack.Green
+
+/*
+
+*/
+control_t*(Controler.P,0): A<> TrafficLightLeftRight.Green and TrafficLightFrontBack.Red
+
+/*
+
+*/
 E[] not( TrafficLightLeftRight.Green and TrafficLightFrontBack.Green )

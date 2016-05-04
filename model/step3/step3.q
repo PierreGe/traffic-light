@@ -3,6 +3,16 @@
 /*
 
 */
+control_t*(4*P,0): A<> TrafficLightLeftRight.Red and TrafficLightFrontBack.Green and Crosswalk.Red
+
+/*
+
+*/
+control_t*(4*P,0): A<> TrafficLightLeftRight.Green and TrafficLightFrontBack.Red and Crosswalk.Red
+
+/*
+
+*/
 A[] Crosswalk.Free imply pulsed==false
 
 /*

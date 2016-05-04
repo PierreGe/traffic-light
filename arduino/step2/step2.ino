@@ -2,7 +2,7 @@
 
 //  Enum state of crosslights
 enum VehicleTrafficLightState { V_GREEN, V_RED, V_CROSSWALK };
-enum CrosswalkTrafficLightState { C_GREEN, C_RED, C_FREE, C_CALLED, C_WAITING};
+enum CrosswalkTrafficLightState { C_GREEN, C_RED, C_CALLED, C_DELAYEDCALL };
 
 typedef struct VehicleTrafficLight
 {
@@ -28,8 +28,7 @@ const byte CROSSWALK_BUTTON = 2;
 
 const int period = 4000;
 bool prec;
-bool fairnessFrontBack = false;
-bool fairnessLeftRight = false;
+bool justCalled = false;
 
 VehicleTrafficLight trafficLightLeftRight, trafficLightFrontBack;
 CrosswalkTrafficLight crosswalk;
@@ -62,7 +61,7 @@ void setup(){
     pinMode(CROSSWALK_GREEN,OUTPUT);
     pinMode(CROSSWALK_RED,OUTPUT);
     pinMode(CROSSWALK_BUTTON,INPUT);
-    attachInterrupt(digitalPinToInterrupt(CROSSWALK_BUTTON),crosswalkCall,CHANGE);
+    attachInterrupt(digitalPinToInterrupt(CROSSWALK_BUTTON),crosswalkCall,RISING);
     initialState();
 }
 
@@ -87,7 +86,6 @@ void trafficLightLeftRightFromGreenToRed() {
 
 void trafficLightLeftRightFromRedToGreen() {
     trafficLightLeftRight.state = V_GREEN;
-    fairnessLeftRight=true;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
     
@@ -100,7 +98,6 @@ void trafficLightLeftRightFromRedToCrosswalk() {
 
 void trafficLightLeftRightFromCrosswalkToGreen() {
   trafficLightLeftRight.state = V_GREEN;
-  fairnessLeftRight=true;
   digitalWrite(LEFT_RIGHT_RED, LOW);
   digitalWrite(LEFT_RIGHT_GREEN, HIGH);
 }
@@ -113,21 +110,18 @@ void trafficLightLeftRightFromCrosswalkToRed() {
 
 void trafficLightFrontBackFromGreenToRed() {
     trafficLightFrontBack.state = V_RED;
-    fairnessFrontBack=true;
     digitalWrite(FRONT_BOTTOM_RED, HIGH);
     digitalWrite(FRONT_BOTTOM_GREEN, LOW);
 }
 
 void trafficLightFrontBackFromRedToGreen() {
     trafficLightFrontBack.state = V_GREEN;
-    fairnessFrontBack=true;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
 void trafficLightFrontBackFromCrosswalkToGreen() {
   trafficLightFrontBack.state = V_GREEN;
-  fairnessFrontBack=true;
   digitalWrite(FRONT_BOTTOM_RED, LOW);
   digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
@@ -144,7 +138,7 @@ void trafficLightFrontBackFromRedToCrosswalk() {
 // ======================== CROSSWALK ========================
 
 void crosswalkCall(){
-  if (crosswalk.state == C_RED && fairnessLeftRight==true && fairnessFrontBack==true) {
+  if (crosswalk.state == C_RED) {
     crosswalkCallFromRedToCalled();
     if (trafficLightFrontBack.state == V_RED) {
       trafficLightFrontBackFromRedToCrosswalk();
@@ -152,18 +146,39 @@ void crosswalkCall(){
     if (trafficLightLeftRight.state == V_RED) {
       trafficLightLeftRightFromRedToCrosswalk();
     }
-  else if (fairnessLeftRight==false && fairnessFrontBack==true){
-    crosswalkCallFromRedToCalled();
-  }
-  else if (fairnessLeftRight==true && fairnessFrontBack==false){
-    crosswalkCallFromRedToCalled();
-  }
+  if (!justCalled) {
+    if (crosswalk.state == C_RED) {
+      crosswalkFromRedToCalled();
+      if (trafficLightFrontBack.state == V_RED) {
+        trafficLightFrontBackFromRedToCrosswalk();
+      }
+      if (trafficLightLeftRight.state == V_RED) {
+        trafficLightLeftRightFromRedToCrosswalk();
+      }
+    }
+  } else {
+    crosswalkFromRedToDelayedCall();
   }
 }
 
-void crosswalkCallFromRedToCalled() {
+void crosswalkFromRedToDelayedCall() {
+  crosswalk.state = C_DELAYEDCALL;
+  digitalWrite(CROSSWALK_CALL,HIGH);
+}
+
+void crosswalkFromRedToCalled() {
   crosswalk.state = C_CALLED;
   digitalWrite(CROSSWALK_CALL,HIGH);
+}
+
+void crosswalkFromDelayedCallToCalled() {
+  crosswalk.state = C_CALLED;
+  if (trafficLightFrontBack.state == V_RED) {
+    trafficLightFrontBackFromRedToCrosswalk();
+  }
+  if (trafficLightLeftRight.state == V_RED) {
+    trafficLightLeftRightFromRedToCrosswalk();
+  }
 }
 
 
@@ -192,15 +207,17 @@ void crosswalkFromGreenToRed() {
     trafficLightFrontBackFromCrosswalkToRed();
     trafficLightLeftRightFromCrosswalkToGreen();
   }
-  fairnessLeftRight=false;
-  fairnessFrontBack=false;
+  justCalled = true;
 }
 
 
 
 // the loop function runs over and over again forever
 void loop() {
+    
     delay(period);
+    justCalled = false;
+    
 
     if (trafficLightLeftRight.state == V_GREEN){
         trafficLightLeftRightFromGreenToRed();
@@ -220,6 +237,8 @@ void loop() {
       crosswalkFromCalledToGreen();
     } else if (crosswalk.state == C_GREEN) {
       crosswalkFromGreenToRed();
+    } else if (crosswalk.state == C_DELAYEDCALL) {
+      crosswalkFromDelayedCallToCalled();
     }
     
     if (!verifier()) {

@@ -28,7 +28,7 @@ const byte BUSPATH_BUTTON = 17;
 
 
 // ====== Enum state of crosslights ======
-enum VehicleTrafficLightStates { V_GREEN, V_RED, V_CROSSWALK };
+enum VehicleTrafficLightStates { V_GREEN, V_RED, V_CROSSWALK,V_BUSPATH };
 enum CrosswalkTrafficLightStates { C_GREEN, C_RED, C_CALLED, C_DELAYEDCALL };
 enum BusTrafficLightStates { B_GREEN, B_RED, B_CALLED, B_DELAYEDCALL };
 typedef struct VehicleTrafficLight
@@ -55,6 +55,13 @@ BusTrafficLight buspath;
 
 
 // ====== Function ======
+
+inline void debug(const char* toPrint){
+    Serial.write(toPrint);
+    Serial.write("\n");
+}
+
+
 void initialState() {
     // first state of every crosslight
     trafficLightLeftRight.state = V_GREEN;
@@ -79,28 +86,35 @@ void initialState() {
     }
 }
 
+
 bool verifier() {
     // crosswalk variable value
     if (crosswalk.state == C_GREEN){
         if (trafficLightLeftRight.state==V_GREEN){
+            debug("verifier() : FATAL ERROR : state : crosswalk and trafficLightLeftRight");
             return 0;
         }
         if (trafficLightFrontBack.state==V_GREEN){
+            debug("verifier() : FATAL ERROR : state : crosswalk and trafficLightFrontBack");
             return 0;
         }
         if (buspath.state == B_GREEN){
+            debug("verifier() : FATAL ERROR : state : crosswalk and buspath");
             return 0;
         }
     }
     // crosswalk pin value
     if (CROSSWALK_GREEN==HIGH){
         if (LEFT_RIGHT_GREEN==HIGH){
+            debug("verifier() : FATAL ERROR : pin : crosswalk and left right");
             return 0;
         }
         if (FRONT_BOTTOM_GREEN==HIGH){
+            debug("verifier() : FATAL ERROR : pin : crosswalk and front bottow");
             return 0;
         }
         if (BUSPATH_GREEN==HIGH){
+            debug("verifier() : FATAL ERROR : pin : crosswalk and buspath");
             return 0;
         }
     }
@@ -108,12 +122,15 @@ bool verifier() {
     // bus variable value
     if (buspath.state == B_GREEN){
         if (trafficLightLeftRight.state==V_GREEN){
+            debug("verifier() : FATAL ERROR : state : buspath and left right");
             return 0;
         }
         if (trafficLightFrontBack.state==V_GREEN){
+            debug("verifier() : FATAL ERROR : state : buspath and front back");
             return 0;
         }
         if (crosswalk.state == B_GREEN){
+            debug("verifier() : FATAL ERROR : state : buspath and crosswalk");
             return 0;
         }
     }
@@ -121,29 +138,37 @@ bool verifier() {
     // bus pin value
     if (BUSPATH_GREEN==HIGH){
         if (LEFT_RIGHT_GREEN==HIGH){
+            debug("verifier() : FATAL ERROR : pin : buspath and left right");
             return 0;
         }
         if (FRONT_BOTTOM_GREEN==HIGH){
+            debug("verifier() : FATAL ERROR : pin : buspath and front back");
             return 0;
         }
         if (CROSSWALK_GREEN==HIGH){
+            debug("verifier() : FATAL ERROR : pin : buspath and crosswalk");
             return 0;
         }
     }
 
     //  basic variable crosslight
     if (trafficLightLeftRight.state==V_GREEN && trafficLightFrontBack.state==V_GREEN){
+        debug("verifier() : FATAL ERROR : state : leftright and frontback");
         return 0;
     }
     //  basic pin crosslight
     if (LEFT_RIGHT_GREEN==HIGH && FRONT_BOTTOM_GREEN==HIGH){
+        debug("verifier() : FATAL ERROR : pin : leftrigh and frontback");
         return 0;
     }
+    debug("verifier() : OKAY");
     return 1;
 }
 
 // the setup function runs once when you press reset or power the board
 void setup(){
+    // serial for debug
+    Serial.begin(9600);
     // initialize OUTPUT pin
     pinMode(ALERT_STATE, OUTPUT);
     pinMode(LEFT_RIGHT_RED, OUTPUT);
@@ -163,6 +188,7 @@ void setup(){
     attachInterrupt(digitalPinToInterrupt(CROSSWALK_BUTTON),crosswalkCall,RISING);
     attachInterrupt(digitalPinToInterrupt(BUSPATH_BUTTON),buspathCall,RISING);
     initialState();
+    debug("setup() : initialisation done");
 }
 
 
@@ -181,9 +207,9 @@ void alertState(){
     // we don't go out of alert state
     while (true) {
         digitalWrite(ALERT_STATE, HIGH);
-        delay(200);
+        delay(100);
         digitalWrite(ALERT_STATE, LOW);
-        delay(80);
+        delay(75);
     }
 }
 
@@ -202,6 +228,7 @@ void trafficLightLeftRightFromRedToGreen() {
 
 }
 
+// crosswalk
 void trafficLightLeftRightFromRedToCrosswalk() {
     trafficLightLeftRight.state = V_CROSSWALK;
     prec = true;
@@ -214,6 +241,22 @@ void trafficLightLeftRightFromCrosswalkToGreen() {
 }
 
 void trafficLightLeftRightFromCrosswalkToRed() {
+    trafficLightLeftRight.state = V_RED;
+}
+
+// bus
+void trafficLightLeftRightFromRedToBuspath() {
+    trafficLightLeftRight.state = V_BUSPATH;
+    prec = true;
+}
+
+void trafficLightLeftRightFromBuspathToGreen() {
+    trafficLightLeftRight.state = V_GREEN;
+    digitalWrite(LEFT_RIGHT_RED, LOW);
+    digitalWrite(LEFT_RIGHT_GREEN, HIGH);
+}
+
+void trafficLightLeftRightFromBuspathToRed() {
     trafficLightLeftRight.state = V_RED;
 }
 
@@ -231,6 +274,7 @@ void trafficLightFrontBackFromRedToGreen() {
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
+// crosswalk
 void trafficLightFrontBackFromCrosswalkToGreen() {
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
@@ -246,10 +290,29 @@ void trafficLightFrontBackFromRedToCrosswalk() {
     prec = false;
 }
 
+// bus
+void trafficLightFrontBackFromBuspathToGreen() {
+    trafficLightFrontBack.state = V_GREEN;
+    digitalWrite(FRONT_BOTTOM_RED, LOW);
+    digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
+}
+
+void trafficLightFrontBackFromBuspathToRed() {
+    trafficLightFrontBack.state = V_RED;
+}
+
+void trafficLightFrontBackFromRedToBuspath() {
+    trafficLightFrontBack.state = V_BUSPATH;
+    prec = false;
+}
+
+
 // ======================== CROSSWALK ========================
 
+// Interupt routine
 void crosswalkCall(){
-    if (!justCalledCrosswalk) {
+    debug("crosswalkCall() : ISR : button pressed");
+    if (!justCalledCrosswalk and buspath.state == B_GREEN) {
         if (crosswalk.state == C_RED) {
             crosswalkFromRedToCalled();
             if (trafficLightFrontBack.state == V_RED) {
@@ -261,6 +324,9 @@ void crosswalkCall(){
         }
     } else {
         crosswalkFromRedToDelayedCall();
+    }
+    if (!verifier()) {
+        alertState();
     }
 }
 
@@ -314,9 +380,10 @@ void crosswalkFromGreenToRed() {
 // ======================== BUSPATH ========================
 
 
-
+//interupt routine
 void buspathCall(){
-    if (!justCalledBusPath) {
+    debug("buspathCall() : ISR : button pressed");
+    if (!justCalledBusPath and crosswalk.state == C_GREEN) {
         if (buspath.state == B_RED) {
             buspathFromRedToCalled();
             if (trafficLightFrontBack.state == V_RED) {
@@ -326,8 +393,12 @@ void buspathCall(){
                 trafficLightLeftRightFromRedToCrosswalk();
             }
         }
-    } else {
+    }
+    else {
         buspathFromRedToDelayedCall();
+    }
+    if (!verifier()) {
+        alertState();
     }
 }
 
@@ -344,19 +415,19 @@ void buspathFromRedToCalled() {
 void buspathFromDelayedCallToCalled() {
     buspath.state = B_CALLED;
     if (trafficLightFrontBack.state == V_RED) {
-        trafficLightFrontBackFromRedToCrosswalk();
+        trafficLightFrontBackFromRedToBuspath();
     }
     if (trafficLightLeftRight.state == V_RED) {
-        trafficLightLeftRightFromRedToCrosswalk();
+        trafficLightLeftRightFromRedToBuspath();
     }
 }
 
 void buspathFromCalledToGreen() {
     if (trafficLightFrontBack.state == V_RED) {
-        trafficLightFrontBackFromRedToCrosswalk();
+        trafficLightFrontBackFromRedToBuspath();
     }
     if (trafficLightLeftRight.state == V_RED) {
-        trafficLightLeftRightFromRedToCrosswalk();
+        trafficLightLeftRightFromRedToBuspath();
     }
     buspath.state = B_GREEN;
     digitalWrite(BUSPATH_GREEN,HIGH);
@@ -369,11 +440,11 @@ void buspathFromGreenToRed() {
     digitalWrite(BUSPATH_GREEN,LOW);
     digitalWrite(BUSPATH_RED,HIGH);
     if ( prec == true ) {
-        trafficLightFrontBackFromCrosswalkToGreen();
-        trafficLightLeftRightFromCrosswalkToRed();
+        trafficLightFrontBackFromBuspathToGreen();
+        trafficLightLeftRightFromBuspathToRed();
     } else { // prec == false
-        trafficLightFrontBackFromCrosswalkToRed();
-        trafficLightLeftRightFromCrosswalkToGreen();
+        trafficLightFrontBackFromBuspathToRed();
+        trafficLightLeftRightFromBuspathToGreen();
     }
     justCalledBusPath = true;
 }
@@ -387,8 +458,8 @@ void buspathFromGreenToRed() {
 void loop() {
 
     delay(GLOBAL_PERIOD);
-    justCalledCrosswalk = false;
     justCalledBusPath = false;
+    justCalledCrosswalk = false;
 
 
     if (trafficLightLeftRight.state == V_GREEN){
@@ -405,12 +476,15 @@ void loop() {
         trafficLightFrontBackFromRedToGreen();
     }
 
-    if (crosswalk.state == C_CALLED) {
-        crosswalkFromCalledToGreen();
-    } else if (crosswalk.state == C_GREEN) {
-        crosswalkFromGreenToRed();
-    } else if (crosswalk.state == C_DELAYEDCALL) {
-        crosswalkFromDelayedCallToCalled();
+
+    if (buspath.state != B_CALLED){
+        if (crosswalk.state == C_CALLED) {
+            crosswalkFromCalledToGreen();
+        } else if (crosswalk.state == C_GREEN) {
+            crosswalkFromGreenToRed();
+        } else if (crosswalk.state == C_DELAYEDCALL) {
+            crosswalkFromDelayedCallToCalled();
+        }
     }
 
     if (buspath.state == B_CALLED) {
@@ -420,6 +494,7 @@ void loop() {
     } else if (buspath.state == B_DELAYEDCALL) {
         buspathFromDelayedCallToCalled();
     }
+
 
     if (!verifier()) {
         alertState();

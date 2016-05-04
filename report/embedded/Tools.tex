@@ -5,7 +5,7 @@ In this section, we will describe the tools we use and have used to create our s
 We had the idea not to only test our code in an application, but also to see live what is happening in our system. From that idea, we decided to create thanks to an Arduino Due controller our traffic lights system. In this controller, we placed LEDs on the boards to imitate the green, orange and red lights of the system. We also added a button for the pedestrians to imitate a real call as we would want to go through a crossroad and another push-button to generate the arrival of a bus in the system. There are also what we call information LEDs that can be lighten up if we arrive in a state that is problematic. This for example means that if all the lights for the cars are green at the same time, there would be a problem in our controller and crashes will thus happen. In this sense, we took some proprieties we modeled for the Verification project and we incorporated them into our embedded system.
 \begin{figure}[!ht]\label{fig:arduino}
   \centering
-    \includegraphics[width=0.8\textwidth]{picture/arduino.jpg}
+    \includegraphics[width=0.5\textwidth]{picture/arduino.jpg}
     \caption{Arduino Due used for the embedded system}
 \end{figure} \\
 To do so, we wrote the code needed for the good functioning of our system in C.

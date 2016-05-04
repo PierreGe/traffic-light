@@ -46,6 +46,10 @@ typedef struct BusTrafficLight
 
 
 // ====== Working var ======
+
+volatile bool isrBuspath = false;
+volatile bool isrCrosswalk = false;
+int delayer = 0;
 bool prec = false;
 bool justCalledCrosswalk = false;
 bool justCalledBusPath = false;
@@ -59,6 +63,7 @@ BusTrafficLight buspath;
 inline void debug(const char* toPrint){
     Serial.write(toPrint);
     Serial.write("\n");
+    delay(50);
 }
 
 
@@ -168,7 +173,8 @@ bool verifier() {
 // the setup function runs once when you press reset or power the board
 void setup(){
     // serial for debug
-    Serial.begin(9600);
+    Serial.begin(250000);
+    debug("========= RESET =========");
     // initialize OUTPUT pin
     pinMode(ALERT_STATE, OUTPUT);
     pinMode(LEFT_RIGHT_RED, OUTPUT);
@@ -185,14 +191,15 @@ void setup(){
     // initialize INPUT pin
     pinMode(CROSSWALK_BUTTON,INPUT);
     pinMode(BUSPATH_BUTTON,INPUT);
-    attachInterrupt(digitalPinToInterrupt(CROSSWALK_BUTTON),crosswalkCall,RISING);
-    attachInterrupt(digitalPinToInterrupt(BUSPATH_BUTTON),buspathCall,RISING);
+    attachInterrupt(digitalPinToInterrupt(CROSSWALK_BUTTON),crosswalkCallISR,RISING);
+    attachInterrupt(digitalPinToInterrupt(BUSPATH_BUTTON),buspathCallISR,RISING);
     initialState();
     debug("setup() : initialisation done");
 }
 
 
 void alertState(){
+    debug("alertState() : entering failure state");
     digitalWrite(ALERT_STATE, HIGH);
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, LOW);
@@ -216,12 +223,14 @@ void alertState(){
 // ================ TRAFFIC LIGHT LEFT RIGHT ================
 
 void trafficLightLeftRightFromGreenToRed() {
+    debug("trafficLightLeftRightFromGreenToRed()");
     trafficLightLeftRight.state = V_RED;
     digitalWrite(LEFT_RIGHT_RED, HIGH);
     digitalWrite(LEFT_RIGHT_GREEN, LOW);
 }
 
 void trafficLightLeftRightFromRedToGreen() {
+    debug("trafficLightLeftRightFromRedToGreen()");
     trafficLightLeftRight.state = V_GREEN;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
@@ -230,45 +239,53 @@ void trafficLightLeftRightFromRedToGreen() {
 
 // crosswalk
 void trafficLightLeftRightFromRedToCrosswalk() {
+    debug("trafficLightLeftRightFromRedToCrosswalk()");
     trafficLightLeftRight.state = V_CROSSWALK;
     prec = true;
 }
 
 void trafficLightLeftRightFromCrosswalkToGreen() {
+    debug("trafficLightLeftRightFromCrosswalkToGreen()");
     trafficLightLeftRight.state = V_GREEN;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
 }
 
 void trafficLightLeftRightFromCrosswalkToRed() {
+    debug("trafficLightLeftRightFromCrosswalkToRed()");
     trafficLightLeftRight.state = V_RED;
 }
 
 // bus
 void trafficLightLeftRightFromRedToBuspath() {
+    debug("trafficLightLeftRightFromRedToBuspath()");
     trafficLightLeftRight.state = V_BUSPATH;
     prec = true;
 }
 
 void trafficLightLeftRightFromBuspathToGreen() {
+    debug("trafficLightLeftRightFromBuspathToGreen()");
     trafficLightLeftRight.state = V_GREEN;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
 }
 
 void trafficLightLeftRightFromBuspathToRed() {
+    debug("trafficLightLeftRightFromBuspathToRed()");
     trafficLightLeftRight.state = V_RED;
 }
 
 // ================ TRAFFIC LIGHT FRONT BACK ================
 
 void trafficLightFrontBackFromGreenToRed() {
+    debug("trafficLightFrontBackFromGreenToRed()");
     trafficLightFrontBack.state = V_RED;
     digitalWrite(FRONT_BOTTOM_RED, HIGH);
     digitalWrite(FRONT_BOTTOM_GREEN, LOW);
 }
 
 void trafficLightFrontBackFromRedToGreen() {
+    debug("trafficLightFrontBackFromRedToGreen()");
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
@@ -276,38 +293,48 @@ void trafficLightFrontBackFromRedToGreen() {
 
 // crosswalk
 void trafficLightFrontBackFromCrosswalkToGreen() {
+    debug("trafficLightFrontBackFromCrosswalkToGreen()");
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
 void trafficLightFrontBackFromCrosswalkToRed() {
+    debug("trafficLightFrontBackFromCrosswalkToRed()");
     trafficLightFrontBack.state = V_RED;
 }
 
 void trafficLightFrontBackFromRedToCrosswalk() {
+    debug("trafficLightFrontBackFromRedToCrosswalk()");
     trafficLightFrontBack.state = V_CROSSWALK;
     prec = false;
 }
 
 // bus
 void trafficLightFrontBackFromBuspathToGreen() {
+    debug("trafficLightFrontBackFromBuspathToGreen()");
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
 void trafficLightFrontBackFromBuspathToRed() {
+    debug("trafficLightFrontBackFromBuspathToRed()");
     trafficLightFrontBack.state = V_RED;
 }
 
 void trafficLightFrontBackFromRedToBuspath() {
+    debug("trafficLightFrontBackFromRedToBuspath()");
     trafficLightFrontBack.state = V_BUSPATH;
     prec = false;
 }
 
 
 // ======================== CROSSWALK ========================
+
+void crosswalkCallISR(){
+    isrCrosswalk = true;
+}
 
 // Interupt routine
 void crosswalkCall(){
@@ -325,22 +352,22 @@ void crosswalkCall(){
     } else {
         crosswalkFromRedToDelayedCall();
     }
-    if (!verifier()) {
-        alertState();
-    }
 }
 
 void crosswalkFromRedToDelayedCall() {
+    debug("crosswalkFromRedToDelayedCall()");
     crosswalk.state = C_DELAYEDCALL;
     digitalWrite(CROSSWALK_CALL,HIGH);
 }
 
 void crosswalkFromRedToCalled() {
+    debug("crosswalkFromRedToCalled()");
     crosswalk.state = C_CALLED;
     digitalWrite(CROSSWALK_CALL,HIGH);
 }
 
 void crosswalkFromDelayedCallToCalled() {
+    debug("crosswalkFromDelayedCallToCalled()");
     crosswalk.state = C_CALLED;
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToCrosswalk();
@@ -351,6 +378,7 @@ void crosswalkFromDelayedCallToCalled() {
 }
 
 void crosswalkFromCalledToGreen() {
+    debug("crosswalkFromCalledToGreen()");
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToCrosswalk();
     }
@@ -364,6 +392,7 @@ void crosswalkFromCalledToGreen() {
 }
 
 void crosswalkFromGreenToRed() {
+    debug("crosswalkFromGreenToRed()");
     crosswalk.state = C_RED;
     digitalWrite(CROSSWALK_GREEN,LOW);
     digitalWrite(CROSSWALK_RED,HIGH);
@@ -379,6 +408,9 @@ void crosswalkFromGreenToRed() {
 
 // ======================== BUSPATH ========================
 
+void buspathCallISR(){
+    isrBuspath = true;
+}
 
 //interupt routine
 void buspathCall(){
@@ -403,16 +435,19 @@ void buspathCall(){
 }
 
 void buspathFromRedToDelayedCall() {
+    debug("buspathFromRedToDelayedCall()");
     buspath.state = B_DELAYEDCALL;
     digitalWrite(BUSPATH_CALL,HIGH);
 }
 
 void buspathFromRedToCalled() {
+    debug("buspathFromRedToCalled()");
     buspath.state = B_CALLED;
     digitalWrite(BUSPATH_CALL,HIGH);
 }
 
 void buspathFromDelayedCallToCalled() {
+    debug("buspathFromDelayedCallToCalled()");
     buspath.state = B_CALLED;
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToBuspath();
@@ -423,6 +458,7 @@ void buspathFromDelayedCallToCalled() {
 }
 
 void buspathFromCalledToGreen() {
+    debug("buspathFromCalledToGreen()");
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToBuspath();
     }
@@ -436,6 +472,7 @@ void buspathFromCalledToGreen() {
 }
 
 void buspathFromGreenToRed() {
+    debug("buspathFromGreenToRed()");
     buspath.state = B_RED;
     digitalWrite(BUSPATH_GREEN,LOW);
     digitalWrite(BUSPATH_RED,HIGH);
@@ -457,7 +494,24 @@ void buspathFromGreenToRed() {
 // the loop function runs over and over again forever
 void loop() {
 
-    delay(GLOBAL_PERIOD);
+    // GLOBAL DELAY with interrupt flag pooling
+
+    delayer = GLOBAL_PERIOD;
+    while(delayer>0) {
+        if (isrBuspath){
+            isrBuspath = false;
+            buspathCall();
+        }
+        if (isrCrosswalk){
+            isrCrosswalk = false;
+            crosswalkCall();
+        }
+        delayer = delayer - 50;
+        delay(50);
+    }
+
+    // no troll
+
     justCalledBusPath = false;
     justCalledCrosswalk = false;
 
@@ -500,6 +554,7 @@ void loop() {
         alertState();
     }
 }
+
 
 
 

@@ -1,5 +1,3 @@
-
-
 //  Enum state of crosslights
 enum VehicleTrafficLightState { V_GREEN, V_RED, V_CROSSWALK };
 enum CrosswalkTrafficLightState { C_GREEN, C_RED, C_CALLED, C_DELAYEDCALL };
@@ -138,14 +136,6 @@ void trafficLightFrontBackFromRedToCrosswalk() {
 // ======================== CROSSWALK ========================
 
 void crosswalkCall(){
-  if (crosswalk.state == C_RED) {
-    crosswalkCallFromRedToCalled();
-    if (trafficLightFrontBack.state == V_RED) {
-      trafficLightFrontBackFromRedToCrosswalk();
-    }
-    if (trafficLightLeftRight.state == V_RED) {
-      trafficLightLeftRightFromRedToCrosswalk();
-    }
   if (!justCalled) {
     if (crosswalk.state == C_RED) {
       crosswalkFromRedToCalled();
@@ -180,8 +170,6 @@ void crosswalkFromDelayedCallToCalled() {
     trafficLightLeftRightFromRedToCrosswalk();
   }
 }
-
-
 
 void crosswalkFromCalledToGreen() {
   if (trafficLightFrontBack.state == V_RED) {
@@ -245,6 +233,7 @@ void loop() {
         alertState();
     }
 }
+
 
 
 

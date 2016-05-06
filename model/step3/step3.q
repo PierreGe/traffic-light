@@ -3,12 +3,12 @@
 /*
 
 */
-control_t*(4*P,0): A<> TrafficLightLeftRight.Red and TrafficLightFrontBack.Green and Crosswalk.Red
+control_t*(4*P,0): A<> not(TrafficLightLeftRight.Green) and TrafficLightFrontBack.Green and not(Crosswalk.Green)
 
 /*
 
 */
-control_t*(4*P,0): A<> TrafficLightLeftRight.Green and TrafficLightFrontBack.Red and Crosswalk.Red
+control_t*(4*P,0): A<> TrafficLightLeftRight.Green and not(TrafficLightFrontBack.Green) and not(Crosswalk.Green)
 
 /*
 

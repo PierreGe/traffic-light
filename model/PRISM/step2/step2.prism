@@ -1,0 +1,84 @@
+ctmc
+
+
+
+module Controller
+	[change] true -> 1/3.0 : true;
+endmodule
+
+module TrafficLightLeftRight
+	// 0 : Red / 1 : Green / 2 : Crosswalk
+	LRcolor : [0..2] init 0;
+	LRprec : bool init false;
+
+	[change] LRcolor = 0 -> (LRcolor' = 1);
+	[change] LRcolor = 1 -> (LRcolor' = 0);
+	[change] LRcolor = 2 & FBcolor = 1 -> (LRcolor' = 2);
+	[change] LRcolor = 2 & FBcolor = 2 & CWstate = 1 -> (LRcolor'=2);
+
+	[call] LRcolor = 0 -> (LRcolor' = 2) & (LRprec'=true);
+	[call] LRcolor = 1 & FBcolor=0 -> (LRcolor' = 1);
+	[call] LRcolor = 2 & LRprec -> (LRprec'=false);
+
+	[free] LRprec & LRcolor = 2 -> (LRcolor' = 0);
+	[free] !LRprec & LRcolor = 2 -> (LRcolor'=1);
+endmodule
+
+module TrafficLightFrontBack
+	// 0: Red / 1 : Green / 2 : Crosswalk
+	FBcolor : [0..2] init 1;
+	FBprec : bool init false;
+	[change] FBcolor = 0 -> (FBcolor' = 1);
+	[change] FBcolor = 1 -> (FBcolor' = 0);
+	[change] FBcolor = 2 & LRcolor = 1 -> (FBcolor' = 2);
+	[change] LRcolor = 2 & FBcolor = 2 & CWstate = 1 -> (FBcolor'=2);
+
+	[call] FBcolor = 0 -> (FBcolor' = 2) & (FBprec'=true);
+	[call] FBcolor = 1 & LRcolor = 0 -> (FBcolor' = 1);
+	[call] FBcolor = 2 & FBprec -> (FBprec'=false);
+
+	[free] FBprec & FBcolor = 2 -> (FBcolor' = 0);
+	[free] !FBprec & FBcolor = 2 -> (FBcolor'=1);
+endmodule
+
+
+const double CWtime;
+
+module crosswalk
+	// 0 : Red / 1 : Green / 2 : Called / 3 : Waiting / 4 : Free / 5 : DelayedCall / 6 : Return
+	CWstate : [0..6] init 0;
+	CWjustCalled : bool init false;
+
+	[change] CWstate = 0 -> (CWjustCalled'=false);
+
+	[delayedCall] CWjustCalled & CWstate=0 -> 1/CWtime : (CWstate'=5);
+	[call] !CWjustCalled & CWstate = 0 -> 1/CWtime : (CWstate'=2);
+	[call] CWstate = 3 -> (CWstate'=1);
+	[call] CWstate = 6 -> (CWstate'=2);
+
+	[change] CWstate = 2 -> (CWstate'=3);
+	[change] CWstate = 5 -> (CWstate'=6);
+	[change] CWstate = 1 -> (CWstate'=4);
+
+	[free] CWstate = 4 -> (CWstate'=0);
+
+endmodule
+
+
+rewards "changed"
+	[change] true: 1;
+endrewards
+
+rewards "CWgreen"
+	[call] CWstate = 3 : 1;
+endrewards
+
+rewards "LRgreen"
+	[change] LRcolor = 0 : 1;
+	[free] !LRprec & LRcolor = 2 : 1;
+endrewards
+
+rewards "FBgreen"
+	[change] FBcolor = 0 : 1;
+	[free] !FBprec & FBcolor = 2 : 1;
+endrewards

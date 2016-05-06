@@ -1,0 +1,10 @@
+const double T = 300;
+
+R{"changed"}=? [ C<=T ]
+
+R{"CWgreen"}=? [C<=T]
+
+R{"LRgreen"}=? [C <= T]
+
+R{"FBgreen"}=? [C <= T]
+

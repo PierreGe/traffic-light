@@ -312,18 +312,19 @@ void signalFree() {
 // ================ TRAFFIC LIGHT LEFT RIGHT ================
 
 void trafficLightLeftRightFromGreenToRed() {
-    debug("trafficLightLeftRightFromGreenToRed()");
+    debug("trafficLightLeftRight: Green --> Red");
     trafficLightLeftRight.state = V_RED;
     digitalWrite(LEFT_RIGHT_RED, HIGH);
     digitalWrite(LEFT_RIGHT_GREEN, LOW);
 }
 
 void trafficLightLeftRightFromCrosswalkToBusPath() {
+    debug("trafficLightLeftRight: Crosswalk --> Buspath");
     trafficLightLeftRight.state = V_BUSPATH;
 }
 
 void trafficLightLeftRightFromRedToGreen() {
-    debug("trafficLightLeftRightFromRedToGreen()");
+    debug("trafficLightLeftRight: Red --> Green");
     trafficLightLeftRight.state = V_GREEN;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
@@ -332,61 +333,63 @@ void trafficLightLeftRightFromRedToGreen() {
 
 // crosswalk
 void trafficLightLeftRightFromRedToCrosswalk() {
-    debug("trafficLightLeftRightFromRedToCrosswalk()");
+    debug("trafficLightLeftRight: Red --> Crosswalk");
     trafficLightLeftRight.state = V_CROSSWALK;
     prec = true;
 }
 
 void trafficLightLeftRightFromCrosswalkToGreen() {
-    debug("trafficLightLeftRightFromCrosswalkToGreen()");
+    debug("trafficLightLeftRight: Crosswalk --> Green");
     trafficLightLeftRight.state = V_GREEN;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
 }
 
 void trafficLightLeftRightFromCrosswalkToRed() {
-    debug("trafficLightLeftRightFromCrosswalkToRed()");
+    debug("trafficLightLeftRight: Crosswalk --> Red");
     trafficLightLeftRight.state = V_RED;
 }
 
 // bus
 void trafficLightLeftRightFromRedToBuspath() {
-    debug("trafficLightLeftRightFromRedToBuspath()");
+    debug("trafficLightLeftRight: Red --> Buspath");
     trafficLightLeftRight.state = V_BUSPATH;
     prec = true;
 }
 
 void trafficLightLeftRightFromBusPathToGreen() {
-    debug("trafficLightLeftRightFromBuspathToGreen()");
+    debug("trafficLightLeftRight: Buspath --> Green");
     trafficLightLeftRight.state = V_GREEN;
     digitalWrite(LEFT_RIGHT_RED, LOW);
     digitalWrite(LEFT_RIGHT_GREEN, HIGH);
 }
 
 void trafficLightLeftRightFromBusPathToRed() {
-    debug("trafficLightLeftRightFromBuspathToRed()");
+    debug("trafficLightLeftRight: Buspath --> Red");
     trafficLightLeftRight.state = V_RED;
 }
 
 void trafficLightLeftRightFromBusPathToCrosswalk() {
+    debug("trafficLightLeftRight: Buspath --> Crosswalk");
     trafficLightLeftRight.state = V_CROSSWALK; 
 }
 
 // ================ TRAFFIC LIGHT FRONT BACK ================
 
 void trafficLightFrontBackFromGreenToRed() {
-    debug("trafficLightFrontBackFromGreenToRed()");
+    debug("trafficLightFrontBack: Green --> Red");
     trafficLightFrontBack.state = V_RED;
     digitalWrite(FRONT_BOTTOM_RED, HIGH);
     digitalWrite(FRONT_BOTTOM_GREEN, LOW);
 }
 
 void trafficLightFrontBackFromCrosswalkToBusPath() {
+    debug("trafficLightFrontBack: Crosswalk --> Buspath");
     trafficLightFrontBack.state = V_BUSPATH;
 }
 
 void trafficLightFrontBackFromRedToGreen() {
-    debug("trafficLightFrontBackFromRedToGreen()");
+    debug("trafficLightFrontBack: Red --> Green");
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
@@ -394,43 +397,44 @@ void trafficLightFrontBackFromRedToGreen() {
 
 // crosswalk
 void trafficLightFrontBackFromCrosswalkToGreen() {
-    debug("trafficLightFrontBackFromCrosswalkToGreen()");
+    debug("trafficLightFrontBack: Crosswalk --> Green");
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
 void trafficLightFrontBackFromCrosswalkToRed() {
-    debug("trafficLightFrontBackFromCrosswalkToRed()");
+    debug("trafficLightFrontBack: Crosswalk --> Red");
     trafficLightFrontBack.state = V_RED;
 }
 
 void trafficLightFrontBackFromRedToCrosswalk() {
-    debug("trafficLightFrontBackFromRedToCrosswalk()");
+    debug("trafficLightFrontBack: Red --> Crosswalk");
     trafficLightFrontBack.state = V_CROSSWALK;
     prec = false;
 }
 
 // bus
 void trafficLightFrontBackFromBusPathToGreen() {
-    debug("trafficLightFrontBackFromBuspathToGreen()");
+    debug("trafficLightFrontBack: Buspath --> Green");
     trafficLightFrontBack.state = V_GREEN;
     digitalWrite(FRONT_BOTTOM_RED, LOW);
     digitalWrite(FRONT_BOTTOM_GREEN, HIGH);
 }
 
 void trafficLightFrontBackFromBusPathToRed() {
-    debug("trafficLightFrontBackFromBuspathToRed()");
+    debug("trafficLightFrontBack: Buspath --> Red");
     trafficLightFrontBack.state = V_RED;
 }
 
 void trafficLightFrontBackFromRedToBuspath() {
-    debug("trafficLightFrontBackFromRedToBuspath()");
+    debug("trafficLightFrontBack: Red --> Buspath");
     trafficLightFrontBack.state = V_BUSPATH;
     prec = false;
 }
 
 void trafficLightFrontBackFromBusPathToCrosswalk() {
+    debug("trafficLightFrontBack: Buspath --> Crosswalk");
     trafficLightFrontBack.state = V_CROSSWALK;
 }
 
@@ -444,18 +448,21 @@ void crosswalkCallISR(){
 // Interupt routine
 void crosswalkCall(){
     debug("crosswalkCall() : ISR : button pressed");
-    if (busc) {
-        crosswalkFromRedToPreempted();
-    } else {
-        if (justCalled) {
-            crosswalkFromRedToDelayedCall();
+    if (crosswalk.state == C_RED) {
+        if (busc) {
+            crosswalkFromRedToPreempted();
         } else {
-            crosswalkFromRedToCalled();
+            if (justCalled) {
+                crosswalkFromRedToDelayedCall();
+            } else {
+                crosswalkFromRedToCalled();
+            }
         }
     }
 }
 
 void crosswalkFromRedToPreempted() {
+    debug("crosswalk: Red --> Preempted");
     crosswalk.state = C_PREEMPTED;
     pedc=true;
     preemptible=false;
@@ -464,14 +471,14 @@ void crosswalkFromRedToPreempted() {
 }
 
 void crosswalkFromRedToDelayedCall() {
-    debug("crosswalkFromRedToDelayedCall()");
+    debug("crosswalk: Red --> DelayedCall");
     crosswalk.state = C_DELAYEDCALL;
     pedc=true;
     digitalWrite(CROSSWALK_CALL,HIGH);
 }
 
 void crosswalkFromRedToCalled() {
-    debug("crosswalkFromRedToCalled()");
+    debug("crosswalk: Red --> Called");
     crosswalk.state = C_CALLED;
     pedc=true;
     signalPedestrianCall();
@@ -479,13 +486,13 @@ void crosswalkFromRedToCalled() {
 }
 
 void crosswalkFromDelayedCallToCalled() {
-    debug("crosswalkFromDelayedCallToCalled()");
+    debug("crosswalk: DelayedCall --> Called");
     crosswalk.state = C_CALLED;
     signalPedestrianCall();
 }
 
 void crosswalkFromCalledToGreen() {
-    debug("crosswalkFromCalledToGreen()");
+    debug("crosswalk: Called --> Green");
 
     signalPedestrianCall();
     preemptible = false;
@@ -497,7 +504,7 @@ void crosswalkFromCalledToGreen() {
 }
 
 void crosswalkFromGreenToBuspath() {
-  debug("crosswalkFromGreenToBuspath()");
+  debug("crosswalk: Green --> Buspath");
   crosswalk.state = C_BUSPATH;
   pedc=false;
   signalFree();
@@ -506,7 +513,7 @@ void crosswalkFromGreenToBuspath() {
 }
 
 void crosswalkFromGreenToRed() {
-    debug("crosswalkFromGreenToRed()");
+    debug("crosswalk: Green --> Red");
     crosswalk.state = C_RED;
     preemptible = true;
     pedc=false;
@@ -517,14 +524,17 @@ void crosswalkFromGreenToRed() {
 }
 
 void crosswalkFromCalledToPreempted() {
+    debug("crosswalk: Called --> Preempted");
     crosswalk.state = C_PREEMPTED;
 }
 
 void crosswalkFromDelayedCallToPreempted() {
+    debug("crosswalk: DelayedCall --> Preempted");
     crosswalk.state = C_PREEMPTED;
 }
 
 void crosswalkFromPreemptedToGreen() {
+    debug("crosswalk: Preempted --> Green");
     crosswalk.state = C_GREEN;
     preemptible = false;
     digitalWrite(CROSSWALK_GREEN,HIGH);
@@ -533,6 +543,7 @@ void crosswalkFromPreemptedToGreen() {
 }
 
 void crosswalkFromBusPathToRed() {
+    debug("crosswalk: Buspath --> Red");
     crosswalk.state = C_RED;
     preemptible = true;
     justCalled = true;
@@ -549,13 +560,14 @@ void buspathCallISR(){
 //interupt routine
 void buspathCall(){
     debug("buspathCall() : ISR : button pressed");
-    
-    if (!preemptible) {
-        buspathFromRedToPreempted(); 
-    } else if (!justCalled) { // preemptible==true
-        buspathFromRedToCalled();
-    } else {
-        buspathFromRedToDelayedCall();
+    if (buspath.state == B_RED) {
+        if (!preemptible) {
+            buspathFromRedToPreempted(); 
+        } else if (!justCalled) { // preemptible==true
+            buspathFromRedToCalled();
+        } else {
+            buspathFromRedToDelayedCall();
+        }
     }
     
     if (!verifier()) {
@@ -564,7 +576,7 @@ void buspathCall(){
 }
 
 void buspathFromRedToPreempted() {
-    debug("buspathFromRedToPreempted()");
+    debug("buspath: Red --> Preempted");
     buspath.state = B_PREEMPTED;
     busc = true;
     signalBusCall();
@@ -572,14 +584,14 @@ void buspathFromRedToPreempted() {
 }
 
 void buspathFromRedToDelayedCall() {
-    debug("buspathFromRedToDelayedCall()");
+    debug("buspath: Red --> DelayedCall");
     buspath.state = B_DELAYEDCALL;
     busc = true;
     digitalWrite(BUSPATH_CALL,HIGH);
 }
 
 void buspathFromRedToCalled() {
-    debug("buspathFromRedToCalled()");
+    debug("buspath: Red --> Called()");
     buspath.state = B_CALLED;
     busc = true;
     signalBusCall();
@@ -587,17 +599,18 @@ void buspathFromRedToCalled() {
 }
 
 void buspathFromDelayedCallToCalled() {
-    debug("buspathFromDelayedCallToCalled()");
+    debug("buspath: DelayedCall --> Called");
     buspath.state = B_CALLED;
     signalBusCall();
 }
 
 void buspathFromDelayedCallToPreempted() {
+    debug("buspath: DelayedCall --> Preempted");
     buspath.state = B_PREEMPTED;
 }
 
 void buspathFromCalledToGreen() {
-    debug("buspathFromCalledToGreen()");
+    debug("buspath: Called --> Green");
     buspath.state = B_GREEN;
     signalBusCall();
     digitalWrite(BUSPATH_GREEN,HIGH);
@@ -606,7 +619,7 @@ void buspathFromCalledToGreen() {
 }
 
 void buspathFromGreenToRed() {
-    debug("buspathFromGreenToRed()");
+    debug("buspath: Green --> Red");
     buspath.state = B_RED;
     busc = false;
     justCalled = true;
@@ -616,7 +629,7 @@ void buspathFromGreenToRed() {
 }
 
 void buspathFromGreenToCrosswalk() {
-    debug("buspathFromGreenToCrosswalk()");
+    debug("buspath: Green --> Crosswalk");
     buspath.state = B_CROSSWALK;
     busc = false;
     signalFree();
@@ -625,13 +638,15 @@ void buspathFromGreenToCrosswalk() {
 }
 
 void buspathFromPreemptedToGreen() {
+    debug("buspath: Preempted --> Green");
     buspath.state = B_GREEN;
     digitalWrite(BUSPATH_GREEN,HIGH);
-    digitalWrite(BUSPATH_RED,LOW);
+    digitalWrite(BUSPATH_RED ,LOW);
     digitalWrite(BUSPATH_CALL,LOW);
 }
 
 void buspathFromCrosswalkToRed() {
+    debug("buspath: Crosswalk --> Red");
     buspath.state = B_RED;
     justCalled = true;
 }

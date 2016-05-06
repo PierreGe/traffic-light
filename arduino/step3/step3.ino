@@ -50,10 +50,13 @@ typedef struct BusTrafficLight
 volatile bool isrBuspath = false;
 volatile bool isrCrosswalk = false;
 int delayer = 0;
-bool prec = false;
-bool justCalled = false;
-bool busc, pedc = false;
-bool preemptible = true;
+
+bool prec = false, oldPrec = false;
+bool justCalled = false, oldJustCalled = false;
+bool busc = false, pedc = false, oldBusc =false, oldPedc = false;
+bool preemptible = true, oldPreemptible = true;
+
+
 VehicleTrafficLight trafficLightLeftRight, trafficLightFrontBack;
 CrosswalkTrafficLight crosswalk;
 BusTrafficLight buspath;
@@ -227,7 +230,7 @@ void signalBusCall() {
     if (trafficLightLeftRight.state == V_RED) {
         trafficLightLeftRightFromRedToBuspath();
     } else if (trafficLightLeftRight.state == V_CROSSWALK) {
-        if (preemptible) {
+        if (oldPreemptible) {
             trafficLightLeftRightFromCrosswalkToBusPath();
         }
     }
@@ -235,7 +238,7 @@ void signalBusCall() {
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToBuspath();
     } else if (trafficLightFrontBack.state == V_CROSSWALK) {
-        if (preemptible) {
+        if (oldPreemptible) {
             trafficLightFrontBackFromCrosswalkToBusPath();
         }
     }
@@ -260,17 +263,17 @@ void signalPedestrianCall() {
 
 void signalFree() {
     if (trafficLightLeftRight.state == V_CROSSWALK) {
-        if (busc) {
+        if (oldBusc) {
             trafficLightLeftRightFromCrosswalkToBusPath();
-        } else if (prec) { // busc==false
+        } else if (oldPrec) { // busc==false
             trafficLightLeftRightFromCrosswalkToRed();
         } else { // busc==false && prec==false
             trafficLightLeftRightFromCrosswalkToGreen();
         }
     } else if (trafficLightLeftRight.state == V_BUSPATH) {
-        if (pedc) {
+        if (oldPedc) {
             trafficLightLeftRightFromBusPathToCrosswalk();
-        } else if (prec) { // pedc==false
+        } else if (oldPrec) { // pedc==false
             trafficLightLeftRightFromBusPathToRed();
         } else { // pedc==false && prec==false
             trafficLightLeftRightFromBusPathToGreen();
@@ -278,17 +281,17 @@ void signalFree() {
     }
 
     if (trafficLightFrontBack.state == V_CROSSWALK) {
-        if (busc) {
+        if (oldBusc) {
             trafficLightFrontBackFromCrosswalkToBusPath();
-        } else if (prec) { // busc==false
+        } else if (oldPrec) { // busc==false
             trafficLightFrontBackFromCrosswalkToGreen();
         } else { // busc==false && prec==false
             trafficLightFrontBackFromCrosswalkToRed();
         }
     } else if (trafficLightFrontBack.state == V_BUSPATH) {
-        if (pedc) {
+        if (oldPedc) {
             trafficLightFrontBackFromBusPathToCrosswalk();
-        } else if (prec) { // pedc==false
+        } else if (oldPrec) { // pedc==false
             trafficLightFrontBackFromBusPathToGreen();
         } else { // pedc==false && prec==false
             trafficLightFrontBackFromBusPathToRed();
@@ -449,10 +452,10 @@ void crosswalkCallISR(){
 void crosswalkCall(){
     debug("crosswalkCall() : ISR : button pressed");
     if (crosswalk.state == C_RED) {
-        if (busc) {
+        if (oldBusc) {
             crosswalkFromRedToPreempted();
         } else {
-            if (justCalled) {
+            if (oldJustCalled) {
                 crosswalkFromRedToDelayedCall();
             } else {
                 crosswalkFromRedToCalled();
@@ -465,7 +468,6 @@ void crosswalkFromRedToPreempted() {
     debug("crosswalk: Red --> Preempted");
     crosswalk.state = C_PREEMPTED;
     pedc=true;
-    preemptible=false;
     signalPedestrianCall();
     digitalWrite(CROSSWALK_CALL,HIGH);
 }
@@ -561,11 +563,11 @@ void buspathCallISR(){
 void buspathCall(){
     debug("buspathCall() : ISR : button pressed");
     if (buspath.state == B_RED) {
-        if (!preemptible) {
+        if (!oldPreemptible) {
             buspathFromRedToPreempted(); 
-        } else if (!justCalled) { // preemptible==true
+        } else if (!oldJustCalled) { // oldPreemptible==true
             buspathFromRedToCalled();
-        } else {
+        } else { // oldPreemptible==true && oldJustCalled==true
             buspathFromRedToDelayedCall();
         }
     }
@@ -672,10 +674,14 @@ void loop() {
         delayer = delayer - 50;
         delay(50);
     }
-
+    
     // no troll
     justCalled = false;
 
+    oldJustCalled = justCalled;
+    oldBusc = busc;
+    oldPedc = pedc;
+    oldPreemptible = preemptible;
 
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToGreen();
@@ -692,7 +698,7 @@ void loop() {
     if (crosswalk.state == C_CALLED) {
         crosswalkFromCalledToGreen();
     } else if (crosswalk.state == C_GREEN) {
-        if (busc) {
+        if (oldBusc) {
             crosswalkFromGreenToBuspath();
         } else {
             crosswalkFromGreenToRed();
@@ -704,13 +710,13 @@ void loop() {
     if (buspath.state == B_CALLED) {
         buspathFromCalledToGreen();
     } else if (buspath.state == B_GREEN) {
-        if (!pedc) {
+        if (!oldPedc) {
             buspathFromGreenToRed();
         } else {
             buspathFromGreenToCrosswalk();
         }
     } else if (buspath.state == B_DELAYEDCALL) {
-        if (preemptible) {
+        if (oldPreemptible) {
             buspathFromDelayedCallToCalled();
         } else {
             buspathFromDelayedCallToPreempted();

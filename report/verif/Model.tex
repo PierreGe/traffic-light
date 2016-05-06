@@ -48,7 +48,7 @@ Even if the pedestrians have called to have the green lights before the bus, if 
     \caption{Arduino Due used for the embedded system}
 \end{figure}
 
-\subsubsection{Step 4: Yellow Light}
+\subsubsection{Step 4: Yellow Light}\label{sec:step4}
 For this step, we kept the same model done in step 3 but we added a yellow light. This means that, as in the real life, our cars traffic lights will switch from green to yellow to red. \\
 This is thus our final model developed in Uppaal TiGa.
 
@@ -61,4 +61,34 @@ This is thus our final model developed in Uppaal TiGa.
 \subsection{Timed Automatons}
 In order to formally model the system, we use several timed automatons from Uppaal. While some of those automatons are actors in the environment, the others are part of the controller.
 The theory tells us that, when the environment is playing, we, humans, cannot decide the action that will be taken. For example, buses and pedestrians arrivals are unpredictable and uncontrollable, so they belong to the environment.
-The actors which implement the solution for avoiding crashes belong to the controller. They interact with the environment in order to avoid crashes and thus they aim to find a winning strategy.
+The actors which implement the solution for avoiding crashes belong to the controller. They interact with the environment in order to avoid crashes and thus they aim to find a winning strategy. \\
+We will now give the implementations explanations of the environment and controller actors. In the first one, we will take a look at the pedestrians and buses generators while in the second one, we will look at our traffic light system that tries to find a winning situation (no crashes).
+
+\subsubsection{Environment}
+\paragraph{Crosswalk} \mbox{}\\
+We will here talk about the mechanisms of our crosswalk generator done in our step 4 from Section \ref{sec:step4}. \\
+There are several elements that can be seen on Figure 4.1.
+
+\begin{figure}[!ht]\label{fig:crosswalk}
+  \centering
+    \includegraphics[width=0.9\textwidth]{picture/crosswalk.png}
+    \caption{Pedestrians generator}
+\end{figure}
+\noindent It can first be seen that no orange lights are present here. Indeed, as it was a pedestrians traffic lights in Brussels, there is only the red and green light. We thus decided not to add an orange light for this component. \\
+When the environment play, different states can be reaches. Because we said the bus had total priority, different cases can happen. We will first explain the easiest case that can occur. When there is a call for the light to be green, if no buses are generated, we will reach the waiting state. In this state, we will wait for the cars traffic lights to be red, and when it is the case, the pedestrians light can be green. Of course, it is not that simple, since the buses have priority. Indeed, when the fire is in the red state, a transition going to the preempted state ca happen if there is already a bus. When the bus is gone, then the pedestrians lights can be green.\\
+Another problem can still happen when the call has been made for the pedestrians light to be green. Indeed, if a bus arrives, it must have the priority on the light. This is why we check, until we allowed the green light, if a bus has been generated. If it is the case, we have to wait for the bus to leave the crossroad and then the pedestrians light can be green. \\
+When the green light has to be switched red again, we will first go in a free state where we will check again if another bus has arrived. If an other bus arrives, we let him cross again before releasing the light and then, in any cases (bus or not bus), we go back to the basic red state.
+\paragraph{Bus} \mbox{}\\
+We will here talk about the mechanisms of our bus generator done in our step 4 from Section \ref{sec:step4}. \\
+
+\begin{figure}[!ht]\label{fig:bus}
+  \centering
+    \includegraphics[width=0.9\textwidth]{picture/bus.png}
+    \caption{Buses generator}
+\end{figure}
+
+\noindent This generator follows the same idea as the pedestrians generator. Since there is nothing that has a higher priority than the bus, the model is easier that the one of the pedestrians. We initially start on a red state. If a bus is called (read generated), we wait for the light that is green on the system to be red. When it is the case, the bus light has to be turn to green. We then also check if pedestrians were generated to allow them to have their light green after. \\
+
+Those were the two actors controlled by the environment.
+
+\subsubsection{Controller}

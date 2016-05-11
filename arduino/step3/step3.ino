@@ -23,8 +23,8 @@ const byte BUSPATH_GREEN = 4;
 // button
 const byte CROSSWALK_CALL = 14;
 const byte CROSSWALK_BUTTON = 15;
-const byte BUSPATH_CALL = 16;
-const byte BUSPATH_BUTTON = 17;
+const byte BUSPATH_CALL = 18;
+const byte BUSPATH_BUTTON = 19;
 
 
 // ====== Enum state of crosslights ======
@@ -51,11 +51,13 @@ volatile bool isrBuspath = false;
 volatile bool isrCrosswalk = false;
 int delayer = 0;
 
-bool prec = false, oldPrec = false;
-bool justCalled = false, oldJustCalled = false;
-bool busc = false, pedc = false, oldBusc =false, oldPedc = false;
-bool preemptible = true, oldPreemptible = true;
+bool prec = false;
+bool justCalled = false;
+bool busc = false, pedc = false;
+bool preemptible = true;
 
+bool flagCrosswalk = false;
+bool flagBuspath = false;
 
 VehicleTrafficLight trafficLightLeftRight, trafficLightFrontBack;
 CrosswalkTrafficLight crosswalk;
@@ -227,10 +229,11 @@ void alertState(){
 // ================ SIGNALS ================
 
 void signalBusCall() {
+    debug("SIGNAL: BUS");
     if (trafficLightLeftRight.state == V_RED) {
         trafficLightLeftRightFromRedToBuspath();
     } else if (trafficLightLeftRight.state == V_CROSSWALK) {
-        if (oldPreemptible) {
+        if (preemptible) {
             trafficLightLeftRightFromCrosswalkToBusPath();
         }
     }
@@ -238,7 +241,7 @@ void signalBusCall() {
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToBuspath();
     } else if (trafficLightFrontBack.state == V_CROSSWALK) {
-        if (oldPreemptible) {
+        if (preemptible || busc) {
             trafficLightFrontBackFromCrosswalkToBusPath();
         }
     }
@@ -253,6 +256,7 @@ void signalBusCall() {
 }
 
 void signalPedestrianCall() {
+    debug("SIGNAL: PEDESTRIAN");
     if (trafficLightLeftRight.state == V_RED) {
         trafficLightLeftRightFromRedToCrosswalk();
     }
@@ -262,18 +266,19 @@ void signalPedestrianCall() {
 }
 
 void signalFree() {
+    debug("SIGNAL: FREE");
     if (trafficLightLeftRight.state == V_CROSSWALK) {
-        if (oldBusc) {
+        if (busc) {
             trafficLightLeftRightFromCrosswalkToBusPath();
-        } else if (oldPrec) { // busc==false
+        } else if (prec) { // busc==false
             trafficLightLeftRightFromCrosswalkToRed();
         } else { // busc==false && prec==false
             trafficLightLeftRightFromCrosswalkToGreen();
         }
     } else if (trafficLightLeftRight.state == V_BUSPATH) {
-        if (oldPedc) {
+        if (pedc) {
             trafficLightLeftRightFromBusPathToCrosswalk();
-        } else if (oldPrec) { // pedc==false
+        } else if (prec) { // pedc==false
             trafficLightLeftRightFromBusPathToRed();
         } else { // pedc==false && prec==false
             trafficLightLeftRightFromBusPathToGreen();
@@ -281,17 +286,17 @@ void signalFree() {
     }
 
     if (trafficLightFrontBack.state == V_CROSSWALK) {
-        if (oldBusc) {
+        if (busc) {
             trafficLightFrontBackFromCrosswalkToBusPath();
-        } else if (oldPrec) { // busc==false
+        } else if (prec) { // busc==false
             trafficLightFrontBackFromCrosswalkToGreen();
         } else { // busc==false && prec==false
             trafficLightFrontBackFromCrosswalkToRed();
         }
     } else if (trafficLightFrontBack.state == V_BUSPATH) {
-        if (oldPedc) {
+        if (pedc) {
             trafficLightFrontBackFromBusPathToCrosswalk();
-        } else if (oldPrec) { // pedc==false
+        } else if (prec) { // pedc==false
             trafficLightFrontBackFromBusPathToGreen();
         } else { // pedc==false && prec==false
             trafficLightFrontBackFromBusPathToRed();
@@ -452,10 +457,10 @@ void crosswalkCallISR(){
 void crosswalkCall(){
     debug("crosswalkCall() : ISR : button pressed");
     if (crosswalk.state == C_RED) {
-        if (oldBusc) {
+        if (busc) {
             crosswalkFromRedToPreempted();
         } else {
-            if (oldJustCalled) {
+            if (justCalled) {
                 crosswalkFromRedToDelayedCall();
             } else {
                 crosswalkFromRedToCalled();
@@ -466,10 +471,11 @@ void crosswalkCall(){
 
 void crosswalkFromRedToPreempted() {
     debug("crosswalk: Red --> Preempted");
+    signalPedestrianCall();
     crosswalk.state = C_PREEMPTED;
     pedc=true;
-    signalPedestrianCall();
     digitalWrite(CROSSWALK_CALL,HIGH);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromRedToDelayedCall() {
@@ -477,62 +483,68 @@ void crosswalkFromRedToDelayedCall() {
     crosswalk.state = C_DELAYEDCALL;
     pedc=true;
     digitalWrite(CROSSWALK_CALL,HIGH);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromRedToCalled() {
     debug("crosswalk: Red --> Called");
+    signalPedestrianCall();
     crosswalk.state = C_CALLED;
     pedc=true;
-    signalPedestrianCall();
     digitalWrite(CROSSWALK_CALL,HIGH);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromDelayedCallToCalled() {
     debug("crosswalk: DelayedCall --> Called");
-    crosswalk.state = C_CALLED;
     signalPedestrianCall();
+    crosswalk.state = C_CALLED;
+    flagCrosswalk = true;
 }
 
 void crosswalkFromCalledToGreen() {
     debug("crosswalk: Called --> Green");
-
     signalPedestrianCall();
-    preemptible = false;
-    
     crosswalk.state = C_GREEN;
+    preemptible = false;
     digitalWrite(CROSSWALK_GREEN,HIGH);
     digitalWrite(CROSSWALK_RED,LOW);
     digitalWrite(CROSSWALK_CALL,LOW);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromGreenToBuspath() {
-  debug("crosswalk: Green --> Buspath");
-  crosswalk.state = C_BUSPATH;
-  pedc=false;
-  signalFree();
-  digitalWrite(CROSSWALK_GREEN,LOW);
-  digitalWrite(CROSSWALK_RED,HIGH);
+    debug("crosswalk: Green --> Buspath");
+    signalFree();
+    crosswalk.state = C_BUSPATH;
+    pedc=false;
+    digitalWrite(CROSSWALK_GREEN,LOW);
+    digitalWrite(CROSSWALK_RED,HIGH);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromGreenToRed() {
     debug("crosswalk: Green --> Red");
+    signalFree();
     crosswalk.state = C_RED;
     preemptible = true;
     pedc=false;
     justCalled = true;
-    signalFree();
     digitalWrite(CROSSWALK_GREEN,LOW);
     digitalWrite(CROSSWALK_RED,HIGH);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromCalledToPreempted() {
     debug("crosswalk: Called --> Preempted");
     crosswalk.state = C_PREEMPTED;
+    flagCrosswalk = true;
 }
 
 void crosswalkFromDelayedCallToPreempted() {
     debug("crosswalk: DelayedCall --> Preempted");
     crosswalk.state = C_PREEMPTED;
+    flagCrosswalk = true;
 }
 
 void crosswalkFromPreemptedToGreen() {
@@ -542,6 +554,7 @@ void crosswalkFromPreemptedToGreen() {
     digitalWrite(CROSSWALK_GREEN,HIGH);
     digitalWrite(CROSSWALK_RED,LOW);
     digitalWrite(CROSSWALK_CALL,LOW);
+    flagCrosswalk = true;
 }
 
 void crosswalkFromBusPathToRed() {
@@ -551,6 +564,7 @@ void crosswalkFromBusPathToRed() {
     justCalled = true;
     digitalWrite(CROSSWALK_GREEN,LOW);
     digitalWrite(CROSSWALK_RED,HIGH);
+    flagCrosswalk = true;
 }
 
 // ======================== BUSPATH ========================
@@ -563,11 +577,11 @@ void buspathCallISR(){
 void buspathCall(){
     debug("buspathCall() : ISR : button pressed");
     if (buspath.state == B_RED) {
-        if (!oldPreemptible) {
+        if (!preemptible) {
             buspathFromRedToPreempted(); 
-        } else if (!oldJustCalled) { // oldPreemptible==true
+        } else if (!justCalled) { // preemptible==true
             buspathFromRedToCalled();
-        } else { // oldPreemptible==true && oldJustCalled==true
+        } else { // preemptible==true && justCalled==true
             buspathFromRedToDelayedCall();
         }
     }
@@ -579,10 +593,11 @@ void buspathCall(){
 
 void buspathFromRedToPreempted() {
     debug("buspath: Red --> Preempted");
+    signalBusCall();
     buspath.state = B_PREEMPTED;
     busc = true;
-    signalBusCall();
     digitalWrite(BUSPATH_CALL,HIGH);
+    flagBuspath = true;
 }
 
 void buspathFromRedToDelayedCall() {
@@ -590,53 +605,60 @@ void buspathFromRedToDelayedCall() {
     buspath.state = B_DELAYEDCALL;
     busc = true;
     digitalWrite(BUSPATH_CALL,HIGH);
+    flagBuspath = true;
 }
 
 void buspathFromRedToCalled() {
     debug("buspath: Red --> Called()");
+    signalBusCall();
     buspath.state = B_CALLED;
     busc = true;
-    signalBusCall();
     digitalWrite(BUSPATH_CALL,HIGH);
+    flagBuspath = true;
 }
 
 void buspathFromDelayedCallToCalled() {
     debug("buspath: DelayedCall --> Called");
-    buspath.state = B_CALLED;
     signalBusCall();
+    buspath.state = B_CALLED;
+    flagBuspath = true;
 }
 
 void buspathFromDelayedCallToPreempted() {
     debug("buspath: DelayedCall --> Preempted");
     buspath.state = B_PREEMPTED;
+    flagBuspath = true;
 }
 
 void buspathFromCalledToGreen() {
     debug("buspath: Called --> Green");
-    buspath.state = B_GREEN;
     signalBusCall();
+    buspath.state = B_GREEN;
     digitalWrite(BUSPATH_GREEN,HIGH);
     digitalWrite(BUSPATH_RED,LOW);
     digitalWrite(BUSPATH_CALL,LOW);
+    flagBuspath = true;
 }
 
 void buspathFromGreenToRed() {
     debug("buspath: Green --> Red");
+    signalFree();
     buspath.state = B_RED;
     busc = false;
     justCalled = true;
-    signalFree();
     digitalWrite(BUSPATH_GREEN,LOW);
     digitalWrite(BUSPATH_RED,HIGH);    
+    flagBuspath = true;
 }
 
 void buspathFromGreenToCrosswalk() {
     debug("buspath: Green --> Crosswalk");
+    signalFree();
     buspath.state = B_CROSSWALK;
     busc = false;
-    signalFree();
     digitalWrite(BUSPATH_GREEN,LOW);
     digitalWrite(BUSPATH_RED,HIGH);   
+    flagBuspath = true;
 }
 
 void buspathFromPreemptedToGreen() {
@@ -645,12 +667,14 @@ void buspathFromPreemptedToGreen() {
     digitalWrite(BUSPATH_GREEN,HIGH);
     digitalWrite(BUSPATH_RED ,LOW);
     digitalWrite(BUSPATH_CALL,LOW);
+    flagBuspath = true;
 }
 
 void buspathFromCrosswalkToRed() {
     debug("buspath: Crosswalk --> Red");
     buspath.state = B_RED;
     justCalled = true;
+    flagBuspath = true;
 }
 
 // ======================== MAIN ========================
@@ -678,11 +702,11 @@ void loop() {
     // no troll
     justCalled = false;
 
-    oldJustCalled = justCalled;
-    oldBusc = busc;
-    oldPedc = pedc;
-    oldPreemptible = preemptible;
+    flagBuspath = false;
+    flagCrosswalk = false;
 
+    debug("SIGNAL: CHANGE");
+    
     if (trafficLightFrontBack.state == V_RED) {
         trafficLightFrontBackFromRedToGreen();
     } else if (trafficLightFrontBack.state == V_GREEN) {
@@ -695,34 +719,37 @@ void loop() {
         trafficLightLeftRightFromGreenToRed();
     }
 
-    if (crosswalk.state == C_CALLED) {
-        crosswalkFromCalledToGreen();
-    } else if (crosswalk.state == C_GREEN) {
-        if (oldBusc) {
-            crosswalkFromGreenToBuspath();
-        } else {
-            crosswalkFromGreenToRed();
-        }
-    } else if (crosswalk.state == C_DELAYEDCALL) {
-        crosswalkFromDelayedCallToCalled();
-    }
-
-    if (buspath.state == B_CALLED) {
-        buspathFromCalledToGreen();
-    } else if (buspath.state == B_GREEN) {
-        if (!oldPedc) {
-            buspathFromGreenToRed();
-        } else {
-            buspathFromGreenToCrosswalk();
-        }
-    } else if (buspath.state == B_DELAYEDCALL) {
-        if (oldPreemptible) {
-            buspathFromDelayedCallToCalled();
-        } else {
-            buspathFromDelayedCallToPreempted();
+    if (flagCrosswalk==false) {
+        if (crosswalk.state == C_CALLED) {
+            crosswalkFromCalledToGreen();
+        } else if (crosswalk.state == C_GREEN) {
+            if (busc) {
+                crosswalkFromGreenToBuspath();
+            } else {
+                crosswalkFromGreenToRed();
+            }
+        } else if (crosswalk.state == C_DELAYEDCALL) {
+            crosswalkFromDelayedCallToCalled();
         }
     }
-
+    
+    if (flagBuspath==false){ 
+        if (buspath.state == B_CALLED) {
+            buspathFromCalledToGreen();
+        } else if (buspath.state == B_GREEN) {
+            if (!pedc) {
+                buspathFromGreenToRed();
+            } else {
+                buspathFromGreenToCrosswalk();
+            }
+        } else if (buspath.state == B_DELAYEDCALL) {
+            if (preemptible) {
+                buspathFromDelayedCallToCalled();
+            } else {
+                buspathFromDelayedCallToPreempted();
+            }
+        } 
+    }
 
     if (!verifier()) {
         alertState();

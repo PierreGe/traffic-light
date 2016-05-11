@@ -6,9 +6,13 @@
 \usepackage[english]{babel}															% English language/hyphenation
 \usepackage[protrusion=true,expansion=true]{microtype}	
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
-\usepackage[pdftex]{graphicx}	
-\usepackage{url}
+%images and colors
+\usepackage{graphicx}
+\usepackage{float}
 
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 
 %%% Custom sectioning
 \usepackage{sectsty}
@@ -62,12 +66,9 @@
 \newpage
 \tableofcontents
 \input{../common/Introduction}
-\input{../common/Prerequisite}
+\input{../common/Concepts}
 \input{../common/Tools}
 \input{ToolsVerif}
 \input{Model}
 \input{Conclusion}
-
-\input{Conclusion}
-
 \end{document}

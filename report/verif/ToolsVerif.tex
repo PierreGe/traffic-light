@@ -7,5 +7,8 @@
     \caption{Example of the PRISM language}
   \end{center}
 \end{figure} 
-bla
 
+\noindent In this basic code, we can already see how the syntax works in PRISM. We first define that our model will follow a Continuous-Time Markov Chain by writing ctmc as first line. We then define what PRISM call \textit{module} and it is the same that what we called \textit{Template} in Uppaal. There, we will define our Controller, our different traffic lights and so on. \\
+We can communicate through the different module thanks to the labels we put between brackets and every component with the same label will be executed at the same time, once. \\
+One problem with PRISM and our project is that we want the traffic lights to change every T seconds. This is something that cannot really be done in PRISM, at short-term. Indeed, even if we define a rate, systems transitions can still happen even if $T' \ne T $. This will be solved by looking at how our system works in long-term and in a long-run. Indeed, the rate that is defined by our controller will be reach T when the number of executions is high. \\ 
+This is why we can use PRISM and we will use it to demonstrate other properties that cannot be shown in Uppaal.

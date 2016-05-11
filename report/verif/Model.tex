@@ -92,3 +92,10 @@ We will here talk about the mechanisms of our bus generator done in our step 4 f
 Those were the two actors controlled by the environment.
 
 \subsubsection{Controller}
+\paragraph{Traffic Lights} \mbox{}\\
+
+In this section, we will present the strategy we implemented for the controller to reach a winning strategy. \\
+
+There are two different cars traffic lights. There is the one we called Left-Right, meaning it represents the East-West lights and the Front-Back representing the North-South crossroad. Since the idea is the same, we will just explain the Left-Right one. It just has to be kwown that the initial state for the Left-Right is the red trafic light while for the other one the initial state is the green one. \\
+
+From the red initial state, three different states can be reached. Either the pedestrians asked to have the green light and we go to the \textit{Crosswalk} state, either a bus is called and we go to the bus state or we go to the green state if nothing special happened.

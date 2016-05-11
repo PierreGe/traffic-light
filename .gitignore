@@ -4,10 +4,14 @@ __pycache__/
 *$py.class
 
 
+
 # IDE JUNKS
 .idea
 # C extensions
 *.so
+*.texpadtmp
+*main.pdf
+
 
 # Distribution / packaging
 .Python

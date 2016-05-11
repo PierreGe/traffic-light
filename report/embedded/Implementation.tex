@@ -21,11 +21,11 @@ In our code the Interrupt Service Routine is only setting a volatile boolean to 
 
 \subsection{From Uppaal to C}
 
-Thanks to Uppaal, we believe to have a correct theoretical model. We use it to make the C code. Therefore in our code, we have the state modelized and also the transition
+Thanks to Uppaal, we believe to have a correct theoretical model. We use it to make the C code. Therefore in our code, we have the state and the transition implemented like we can find in Uppaal.
 
 \subsection{Serial monitor}
 
-To be able to detect hardware problems and follows the execution of our system, we enabled the Arduino Serial Monitor. Here is an example of a backtrace :
+To be able to detect hardware problems (e.g. desoldered button) and follows the execution of our system, we enabled the Arduino Serial Monitor. Here is an example of a backtrace :
 
 \begin{verbatim}
 ========= RESET =========
@@ -60,7 +60,7 @@ We defined a function that check if there is a conflicting state in our system (
 
 \subsection{Demonstration}
 
-Here is a 2 minutes video that show what we did better than a thousand words explanation.
+Here is a 2 minutes video that shows what we implemented better than a thousand words description would.
 
 \begin{figure}[H]\label{fig:ytv}
   \centering

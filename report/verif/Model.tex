@@ -98,4 +98,17 @@ In this section, we will present the strategy we implemented for the controller 
 
 There are two different cars traffic lights. There is the one we called Left-Right, meaning it represents the East-West lights and the Front-Back representing the North-South crossroad. Since the idea is the same, we will just explain the Left-Right one. It just has to be kwown that the initial state for the Left-Right is the red trafic light while for the other one the initial state is the green one. \\
 
-From the red initial state, three different states can be reached. Either the pedestrians asked to have the green light and we go to the \textit{Crosswalk} state, either a bus is called and we go to the bus state or we go to the green state if nothing special happened.
+From the red initial state, three different states can be reached:
+\begin{enumerate}
+  \item If a bus has been called, the traffic light has to remain red so the bus can drive through the crosswalk. We thus reach the \textit{Bus} state.
+  \item If pedestrians have pushed the button, we switch to the \textit{Crosswalk} state.
+  \item If no buses or pedestrians were generated and the other cars traffic lights is switching to red, we can reach the \textit{Green} state.
+\end{enumerate}
+
+\subsection{Tested Propreties}
+In this section, we will give and explain the code to formally verify that our system is correct.
+
+\subsubsection{Liveness}
+Stifler écrit les propri
+\subsubsection{Safety} 
+idem

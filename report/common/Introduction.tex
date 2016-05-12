@@ -29,14 +29,14 @@ Before defining the different actors and components in our system, some importan
     \item All the pedestrians light are connected, that means that when pedestrian can cross, all other lights are red.
     \item As for the pedestrians, the vehicles will also cross the street within a given time.
     \item A bus can arrive at any time.
-    \item If there is a bus and a pedestrian arriving at the same time, the bus call take the upper hand.
+    \item If there are a bus and a pedestrian arriving at the same time, the bus call take the upper hand if the pedestrian traffic light is not green, otherwise the bus call is inserted just after the pedestrian.
 \end{itemize}
 
 \subsection{Actors}
 In this section, the different actors interacting with the system will be reviewed. Those include pedestrians, buses and traffic lights.
 
 \subsubsection{Pedestrians}
-As shown on Figure \ref{fig:crossroad}, there are four different crosswalks in our model. To make a call for the pedestrians to cross, a push button has been implemented on the controller. This means that when one pedestrian has pushed one of the button of the crossroad, the call has been made for all the pedestrians from all  sides. When the call is accepted by the system, the pedestrians can walk freely in the crossroad. All the lights for the cars and the buses are to be red. This also means that if no pedestrians are pushing the button, meaning that no pedestrians are present, their traffic lights will always be red and the cars are able to drive through the crossroad.
+As shown on Figure \ref{fig:crossroad}, there are four different crosswalks in our model. To make a call for the pedestrians to cross, a push button has been implemented on the controller. This means that when one pedestrian has pushed one of the button of the crossroad, the call has been made for all the pedestrians from all  sides. When the call is accepted by the system, the pedestrians can walk freely in the crossroad. All the lights for the cars and the buses have to be red. This also means that if no pedestrians are pushing the button, meaning that no pedestrians are present, their traffic lights will always be red and the cars are able to drive through the crossroad.
 To summarize, when the pedestrians can cross, no other vehicles can. 
 
 \subsubsection{Buses}

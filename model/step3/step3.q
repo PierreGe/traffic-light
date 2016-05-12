@@ -1,4 +1,4 @@
-//This file was generated from (Academic) UPPAAL 4.1.4 (rev. 5648), July 2014
+//This file was generated from (Academic) UPPAAL 4.1.4 (rev. 4598), October 2010
 
 /*
 The bus will never have to wait indefinitely to cross the crossroad
@@ -14,16 +14,6 @@ A[] not (((Crosswalk.Green or Crosswalk.Free) and  (Bus.Green or Bus.Free)) or (
 Not bus light green and another green at the same time
 */
 A[] not (((Bus.Green or Bus.Free) and  (Crosswalk.Green or Crosswalk.Free)) or ((Bus.Green or Bus.Free) and TrafficLightFrontBack.Green) or ((Bus.Green or Bus.Free) and TrafficLightLeftRight.Green))
-
-/*
-
-*/
-A[] Crosswalk.Free imply pulsed==false
-
-/*
-
-*/
-A[] Crosswalk.Waiting imply pulsed==false
 
 /*
 

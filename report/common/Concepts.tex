@@ -1,4 +1,4 @@
-\section{Prerequisite}
+\section{Concepts}
 In this section, important theoretical concepts will be explained using a simple traffic light example because they must be clearly understood in order to ensure that our project reach the required level of success. We will discuss about timed automata, temporal logic and their properties, and game theory to reach a winning condition.
 
 \subsection{Timed Automata} \label{sec:automate}
@@ -6,7 +6,7 @@ A timed automaton is essentially a finite automaton (that is a graph
 containing a finite number of nodes and labeled edges) extended with real-valued variables. Those automata run on an infinite words as input and they accept timed languages. The variables that exist in the model can represent logical clocks of the system that will be increased synchronously with the same rate.
 It is possible to add constraints called \textbf{guards} on the edges to create restriction on our automaton. A transition could thus occur when the value of the clock satisfy the guard's condition on the edge.
 
-\begin{figure}[!ht]\label{fig:timed}
+\begin{figure}[H]\label{fig:timed}
   \centering
     \includegraphics[width=0.7\textwidth]{picture/trafficlight.png}
     \caption{A timed automaton example}

@@ -6,8 +6,13 @@
 \usepackage[english]{babel}															% English language/hyphenation
 \usepackage[protrusion=true,expansion=true]{microtype}	
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
-\usepackage[pdftex]{graphicx}	
+%images and colors
+\usepackage{graphicx}
+\usepackage{float}
+% URL
 \usepackage{url}
+\usepackage{hyperref}
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 
 
 %%% Custom sectioning
@@ -61,11 +66,16 @@
 \end{center}
 \newpage
 \tableofcontents
+\newpage
+
 \input{../common/Introduction}
-\input{../common/Prerequisite}
+\input{../common/Concepts}
 \input{../common/Tools}
 \input{ToolsEmbedded}
+\input{Implementation}
 \input{Conclusion}
 
+\input{Acknowledgement}
+\input{Conclusion}
 
 \end{document}

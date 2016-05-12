@@ -1,0 +1,170 @@
+ctmc
+
+
+
+module Controller
+	[change] true -> 1/3.0 : true;
+endmodule
+
+module TrafficLightLeftRight
+	// 0 : Red / 1 : Green / 2 : Crosswalk / 3: Bus
+	LRcolor : [0..3] init 0;
+	LRprec : bool init false;
+
+	[change] LRcolor = 0 -> (LRcolor' = 1); // Red cahnge
+	[change] LRcolor = 1 -> (LRcolor' = 0); // Green change
+	[change] LRcolor = 2 & FBcolor = 1 -> (LRcolor' = 2) & (LRprec'=false); // CW FB green->Red
+	[change] LRcolor=2 & FBcolor=2 & CWstate=1 -> (LRcolor'=2); // CW CWleave Green
+	[change] LRcolor = 3 & FBcolor = 1 -> (LRcolor' = 3) & (LRprec'=false); // Bus FB green->Red
+	[change] LRcolor=3 & FBcolor=3 & BUSstate=1 -> (LRcolor'=3); // Bus BUS leave Green
+	[change] LRcolor=3 & FBcolor=3 & BUSstate=2 & CWstate=7 -> (LRcolor'=3); // Bus BUS leave Called
+	
+
+	[pedCall] LRcolor = 0 & !BUSbusc -> (LRcolor' = 2) & (LRprec' = true); // Red ped call
+	[pedCall] LRcolor = 1 & FBcolor = 0 & !BUSbusc-> (LRcolor' = 1); // Green Pedcall on other light
+	[pedCall] LRcolor = 2 & FBcolor = 0 & !BUSbusc-> (LRcolor' = 2); // CW pedcall on other light
+	[pedCall] LRcolor = 1 & FBcolor = 0 & BUSbusc -> (LRcolor' = 1); // Green Pedcall on other light
+	[pedCall] LRcolor = 2 & FBcolor = 0 & BUSbusc -> (LRcolor' = 2); // CW pedcall on other light	
+
+	[busCall] LRcolor = 0 -> (LRcolor' = 3) & (LRprec' = true); // Red buscall
+	[busCall] LRcolor = 1 & FBcolor = 0 -> (LRcolor' =1); // Green Buscall on other light
+	[busCall] LRcolor = 2 & CWpreemptible -> (LRcolor' = 3); // CW buscall
+	[busCall] LRcolor = 3 & FBcolor = 0 -> (LRcolor' = 3); // Bus buscall on other light
+	[busCall] FBcolor = 3 & LRcolor = 3 & BUSstate = 3 & CWstate = 7 -> (LRcolor'=3); // Bus BUS waiting to green
+
+	[free] LRcolor = 2 & !BUSbusc & LRprec -> (LRcolor' = 0); // CW free
+	[free] LRcolor = 2 & !BUSbusc & !LRprec -> (LRcolor' = 1); // CW free
+	[free] LRcolor = 2 & BUSbusc -> (LRcolor' = 3); // CW free
+	[free] LRcolor = 3 & CWpedc -> (LRcolor' = 2); // Bus free
+	[free] LRcolor = 3 & !CWpedc & LRprec -> (LRcolor' =0); // Bus free
+	[free] LRcolor = 3 & !CWpedc & !LRprec -> (LRcolor'= 1); // Bus free
+
+	
+endmodule
+
+module TrafficLightFrontBack
+	// 0: Red / 1 : Green / 2 : Crosswalk // 3: Bus
+	FBcolor : [0..3] init 1;
+	FBprec : bool init false;
+	
+
+	[change] FBcolor = 0 -> (FBcolor' = 1); // Red change
+	[change] FBcolor = 1 -> (FBcolor' = 0); // Green change
+	[change] FBcolor = 2 & LRcolor = 1 -> (FBcolor' = 2) & (FBprec'=false); // CW LR green->Red
+	[change] LRcolor=2 & FBcolor=2 & CWstate=1 -> (FBcolor'=2); // CW CWleave Green
+	[change] FBcolor = 3 & LRcolor = 1 -> (FBcolor' = 3) & (FBprec'=false); // Bus LR green->red
+	[change] LRcolor=3 & FBcolor=3 & BUSstate=1 -> (FBcolor'=3); // Bus BUS leave Green
+	[change] LRcolor=3 & FBcolor=3 & BUSstate=2 & CWstate=7 -> (FBcolor'=3); // Bus BUS leave Called
+
+	[pedCall] FBcolor = 0 & !BUSbusc -> (FBcolor' = 2) & (FBprec'=true); // Red pedcall
+	[pedCall] FBcolor = 1 & LRcolor = 0 -> (FBcolor' = 1); // Green pedcall on other light
+	[pedCall] FBcolor = 2 & LRcolor = 0 -> (FBcolor' = 2); // CW pedCall on other light
+
+	[busCall] FBcolor = 0 -> (FBcolor' = 3) & (FBprec' = true); // Red buscall
+	[busCall] FBcolor = 1 & LRcolor = 0 -> (FBcolor' =1); // Green Buscall on other light
+	[busCall] FBcolor = 2 & CWpreemptible -> (FBcolor' = 3); // CW buscall
+	[busCall] FBcolor = 3 & LRcolor = 0 -> (FBcolor' = 3); // Bus buscall on other light
+	[busCall] FBcolor = 3 & LRcolor = 3 & BUSstate = 3 & CWstate = 7 -> (FBcolor'=3); // Bus BUS waiting to green
+
+	[free] FBcolor = 2 & !BUSbusc & FBprec -> (FBcolor' = 0); // CW free
+	[free] FBcolor = 2 & !BUSbusc & !FBprec -> (FBcolor' = 1); // CW free
+	[free] FBcolor = 2 & BUSbusc -> (FBcolor' = 3); // CW free
+	[free] FBcolor = 3 & CWpedc -> (FBcolor' = 2); // Bus free
+	[free] FBcolor = 3 & !CWpedc & FBprec -> (FBcolor' = 0); // Bus free
+	[free] FBcolor = 3 & !CWpedc & !FBprec -> (FBcolor' = 1); // Bus free
+
+	
+endmodule
+
+
+const double CWtime;
+
+module crosswalk
+	// 0 : Red / 1 : Green / 2 : Called / 3 : Waiting / 4 : Free / 5 : DelayedCall / 6 : Return
+	// 7 : Preempted / 8: Bus
+	CWstate : [0..8] init 0;
+	CWjustCalled : bool init false;
+	CWpedc : bool init false;
+	CWpreemptible : bool init true;
+
+	[change] CWstate = 0 -> (CWjustCalled' = false); // Red  FB LR change
+	[change] CWstate = 2 -> (CWstate'=3); // Called change
+	[change] CWstate = 5 -> (CWstate'=6); // DelayedCall change
+	[change] CWstate = 1 -> (CWstate'=4); // Green change
+	[change] BUSstate=2 & CWstate=7 -> (CWstate'=7); // Preempted BUS leave Called
+	[change] CWstate = 7 & BUSstate=1 -> (CWstate'=7); // Preempted BUS leave Called
+
+	[delayedPedCall] CWstate = 0 & CWjustCalled & !BUSbusc -> 1/CWtime : (CWstate'=5) & (CWpedc'=true); // Red delayedCall
+	[pedCall] CWstate = 0 & !CWjustCalled & !BUSbusc -> 1/CWtime : (CWstate'=2) & (CWpedc'=true); // Red pedcall
+	[pedCall] CWstate = 0 & BUSbusc -> 1/CWtime : (CWstate'=7) & (CWpedc'=true) & (CWpreemptible'=false); // Red pedcall
+	[pedCall] CWstate = 6 -> (CWstate'=2); // Return pedCall
+	[pedCall] CWstate = 3 -> (CWstate'=1); // Waiting pedCall
+
+	[busCall] CWstate = 2 -> (CWstate'=7); // Called busCall
+	[busCall] CWstate = 6 -> (CWstate'=7); // Return busCall
+	[busCall] CWstate = 3 -> (CWstate'=7); // waiting buscall
+	[busCall] CWstate = 0 -> (CWstate'=0); // Red buscall
+	[busCall] CWstate = 7 -> (CWstate'=7); // Preempted BUS waiting to green
+
+
+	[free] CWstate = 7 -> (CWstate'=1); // Preempted free
+	[free] CWstate = 4 & !BUSbusc -> (CWstate'=0) & (CWpedc'=false) & (CWpreemptible'=true) & (CWjustCalled'=true); // Free free
+	[free] CWstate = 4 & BUSbusc -> (CWstate'=8) & (CWpedc'=false); // Free free
+	[free] CWstate = 8 -> (CWstate'=0) & (CWpreemptible'=true) & (CWjustCalled'=true); // Bus free
+	[free] CWstate = 0 -> (CWstate'=0) & (CWjustCalled'=true); // Red free
+
+endmodule
+
+const double BUStime;
+
+module bus
+	// 0 : Red / 1 : Green / 2: Called / 3: Waiting / 4: Free / 5 : DelayedCall / 6: Return
+	// 7: Preempted /  8 : Crosswalk
+	BUSstate : [0..8] init 0;
+	BUSjustCalled : bool init false;
+	BUSbusc : bool init false;
+
+	[change] BUSstate = 0 -> (BUSjustCalled'=false); // Red FB LR change
+	[change] BUSstate = 2 -> (BUSstate'=3); // Called change
+	[change] BUSstate = 5 -> (BUSstate'=6); // DelayedCall change
+	[change] BUSstate = 1 -> (BUSstate'=4); // Green change
+	[change] BUSstate = 8 -> (BUSstate'=8); // CW : CW leave green
+
+	[delayedBusCall] BUSstate=0 & CWpreemptible & BUSjustCalled -> 1/BUStime : (BUSstate'=5) & (BUSbusc'=true);
+	[busCall] BUSstate=0 & CWpreemptible & !BUSjustCalled -> 1/BUStime : (BUSstate'=2) & (BUSbusc'=true); // Red buscall
+	[busCall] BUSstate=0 & !CWpreemptible -> 1/BUStime : (BUSstate'=7) & (BUSbusc'=true); // Red buscall
+	[busCall] BUSstate=6 & CWpreemptible -> (BUSstate'=2); // Return busscall
+	[busCall] BUSstate=3 -> (BUSstate'=1); // Waiting busscall
+
+	[busPreempt] BUSstate=6 & !CWpreemptible -> (BUSstate'=7); // Return preempt
+
+	[free] BUSstate=7 -> (BUSstate'=1); // Preempted free
+	[free] BUSstate=4 & !CWpedc -> (BUSstate'=0) & (BUSbusc'=false) & (BUSjustCalled'=true); // Free free
+	[free] BUSstate=4 & CWpedc -> (BUSstate'=8) & (BUSbusc'=false); // Free free
+	[free] BUSstate=8 -> (BUSstate'=0) & (BUSjustCalled'=true); // CW free
+	[free] BUSstate=0 -> (BUSstate'=0) & (BUSjustCalled'=true); // Red free
+
+	
+endmodule
+
+rewards "CWgreen"
+	[pedCall] CWstate = 3 : 1; // Waiting to green
+	[free] CWstate = 7 : 1; // Preempted to green
+endrewards
+
+rewards "LRgreen"
+	[change] LRcolor = 0 : 1; // Red to green
+	[free] LRcolor = 2 & !BUSbusc & !LRprec : 1; // CW free to green
+	[free] LRcolor = 3 & !CWpedc & !LRprec : 1; // Bus free to green
+endrewards
+
+rewards "FBgreen"
+	[change] FBcolor = 0 : 1; // Red to green
+	[free] FBcolor = 2 & !BUSbusc & !FBprec : 1; // CW free to green
+	[free] FBcolor = 3 & !CWpedc & !FBprec : 1; // Bus free to green
+endrewards
+
+rewards "BUSgreen"
+	[busCall] BUSstate=3 : 1; // Waiting to green
+	[free] BUSstate=7 : 1; // Preempted to green
+endrewards

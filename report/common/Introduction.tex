@@ -15,11 +15,22 @@ For the formal verification course, a more formal approach was taken. We also ha
 
 We first had to choose which crossroad will be our template. We strongly took inspiration from the Fraiteur crossroad (Boulevard du triomphe and Beaulieulaan) near Delta metro station. The result of our brainstorming is as follows :
 
-\begin{figure}[!ht] \label{fig:crossroad}
+\begin{figure}[H]
+\centering
+\begin{minipage}{.5\textwidth}
   \centering
-    \includegraphics[width=0.75\textwidth]{../common/images/wood-crossroad.jpg}
-    \caption{The crossroad model chosen}
+  \includegraphics[width=.8\linewidth]{../common/images/crossroad.png}
+  \captionof{figure}{Chose template}
+  \label{fig:test1}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.9\linewidth]{../common/images/wood-crossroad.jpg}
+  \captionof{figure}{Implemented template}
+  \label{fig:test2}
+\end{minipage}
 \end{figure}
+
 
 Before defining the different actors and components in our system, some important hypothesis about our model were made:
 \begin{itemize}
@@ -54,4 +65,11 @@ Another assumption is, like in common belgian crossroad, that when the South lig
 
 To test our critical system on a real life environment, we decided to implement it with an arduino, leds and button.
 
-We believe it to be a nice "real-life" exercice because first, for most of us, it was the first time we build something using a micro-controller. Then as we witness it, micro-controller are subject to external unwanted event, like a inducted current in a cable or a button with a badly made pull-up resistor that create an event that should not have taken place. That forces us to create a strong system that can handle all of that.
+We believe it to be a nice "real-life" exercise because first, for most of us, it was the first time we build something using a micro-controller. Then as we witness it, micro-controller are subject to external unwanted event, like a inducted current in a cable or a button with a badly made pull-up resistor that create an event that should not have taken place. That forces us to create a strong system that can handle all of that.
+
+
+\begin{figure}[H]\label{fig:ardhazard}
+  \centering
+    \includegraphics[width=0.7\textwidth]{../common/images/arduinowiring.jpg}
+    \caption{Arduino wiring and hazard}
+\end{figure}

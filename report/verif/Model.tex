@@ -13,7 +13,7 @@ Thanks to this basic example, we understood Uppaal basics and notably how it is 
 In this system, it is possible to check whether our first traffic light is green and the other is red at certain time and vice-versa. Thus we check if we never reach a state where our system is in an impossible and dangerous state where both traffic lights would be green.
 
 
-\begin{figure}[!ht]\label{fig:arduino}
+\begin{figure}[H]\label{fig:arduino}
   \centering
     \includegraphics[width=0.5\textwidth]{picture/model/trafficlight_step1_s1.png}
     \caption{Arduino Due used for the embedded system}
@@ -32,7 +32,7 @@ In this step, more properties were checked. We for example check if, after a tra
 
 \noindent In this step, we also showed thanks to PRISM that our three traffic lights were green with almost the same percentage of time. This can be seen on Figure \ref{fig:prism1}. On this graph, the X-axis represent the average time elapsed between two crosswalk calls while the Y-axis represent the number of times a traffic light is switching to the green state every T (300 in our case) units of time. What we can see is that the more time there is between the pedestrians call, the more our car traffic lights will remain green.
 
-\begin{figure}[!ht]\label{fig:prism1}
+\begin{figure}[H]\label{fig:prism1}
   \centering
     \includegraphics[width=0.5\textwidth]{picture/graphprism.png}
     \caption{Percentage of green lights between the traffic lights}
@@ -45,7 +45,7 @@ When a bus is generated, the next traffic light that has to be green is the one 
 Even if the pedestrians have called to have the green lights before the bus, if a bus is generated between the call and the pedestrians green light, we will first give the green light for the bus, then the pedestrians, then the cars. This mean that the priority hierarchy is \textit{Buses-Pedestrians-Cars}. 
 
 
-\begin{figure}[!ht]\label{fig:step3}
+\begin{figure}[H]\label{fig:step3}
   \centering
     \includegraphics[width=0.5\textwidth]{picture/model/trafficlight_step3_s2.png}
     \caption{Arduino Due used for the embedded system}
@@ -55,7 +55,7 @@ Even if the pedestrians have called to have the green lights before the bus, if 
 For this step, we kept the same model done in step 3 but we added a yellow light. This means that, as in the real life, our cars traffic lights will switch from green to yellow to red. \\
 This is thus our final model developed in Uppaal TiGa.
 
-\begin{figure}[!ht]\label{fig:step4}
+\begin{figure}[H]\label{fig:step4}
   \centering
     \includegraphics[width=0.5\textwidth]{picture/model/Trafficlight_step4.png}
     \caption{Arduino Due used for the embedded system}
@@ -72,7 +72,7 @@ We will now give the implementations explanations of the environment and control
 We will here talk about the mechanisms of our crosswalk generator done in our step 4 from Section \ref{sec:step4}. \\
 There are several elements that can be seen on Figure 4.1.
 
-\begin{figure}[!ht]\label{fig:crosswalk}
+\begin{figure}[H]\label{fig:crosswalk}
   \centering
     \includegraphics[width=0.9\textwidth]{picture/crosswalk.png}
     \caption{Pedestrians generator}
@@ -84,7 +84,7 @@ When the green light has to be switched red again, we will first go in a free st
 \paragraph{Bus} \mbox{}\\
 We will here talk about the mechanisms of our bus generator done in our step 4 from Section \ref{sec:step4}. \\
 
-\begin{figure}[!ht]\label{fig:bus}
+\begin{figure}[H]\label{fig:bus}
   \centering
     \includegraphics[width=0.9\textwidth]{picture/bus.png}
     \caption{Buses generator}

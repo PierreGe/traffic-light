@@ -43,7 +43,7 @@ A[] (not (Crosswalk.Green or Crosswalk.Free) and not( Bus.Green or Bus.Free)) im
 /*
 
 */
-A[] Controller.Pulse
+Crosswalk.Called --> Crosswalk.Green
 
 /*
 Check if all states verify the follow proprety: If the crosswalk is waiting to be green, a trafficlight cannot be green when the other is in Crosswalk mode and is waiting for the crosswalkLight to be green

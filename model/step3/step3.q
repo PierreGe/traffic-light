@@ -26,6 +26,16 @@ A[] not (((Bus.Green or Bus.Free) and  (Crosswalk.Green or Crosswalk.Free)) or (
 A[] not deadlock
 
 /*
+Le feu redevient vert avant 4P 
+*/
+A[] not( TrafficLightFrontBack.Green && TrafficLightFrontBack.tlfbc>4*P )
+
+/*
+Le feu redevient vert avant 4P 
+*/
+A[] not( TrafficLightLeftRight.Green && TrafficLightLeftRight.tllrc>4*P )
+
+/*
 if crosswalk and bus are red, one of traffic light are green
 */
 A[] (not (Crosswalk.Green or Crosswalk.Free) and not( Bus.Green or Bus.Free)) imply  (TrafficLightLeftRight.Green or TrafficLightFrontBack.Green)

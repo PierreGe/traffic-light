@@ -15,12 +15,12 @@ For the formal verification course, a more formal approach was taken. We also ha
 
 We first had to choose which crossroad will be our template. We strongly took inspiration from the Fraiteur crossroad (Boulevard du triomphe and Beaulieulaan) near Delta metro station. The result of our brainstorming is as follows :
 
-\begin{figure}[H]
+\begin{figure}[H]\label{fig:crossroad}
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
   \includegraphics[width=.8\linewidth]{../common/images/crossroad.png}
-  \captionof{figure}{Chose template}
+  \captionof{figure}{Draft of the chosen template}
   \label{fig:test1}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
@@ -61,9 +61,9 @@ We want fairness in our system. So for example, even if the pedestrians can alwa
 Another assumption is, like in common belgian crossroad, that when the South light is green, the North light is also green. On the contrary, when the East light is green, the West light is green. In other words, this means that South-North and East-West direction will have synchronized lights.
 
 
-\subsection{Arduino}
+\subsection{Embedded system}
 
-To test our critical system on a real life environment, we decided to implement it with an arduino, leds and button.
+To test our critical system on a real life environment, we decided to implement it with an arduino, with leds and buttons.
 
 We believe it to be a nice "real-life" exercise because first, for most of us, it was the first time we build something using a micro-controller. Then as we witness it, micro-controller are subject to external unwanted event, like a inducted current in a cable or a button with a badly made pull-up resistor that create an event that should not have taken place. That forces us to create a strong system that can handle all of that.
 
@@ -71,5 +71,5 @@ We believe it to be a nice "real-life" exercise because first, for most of us, i
 \begin{figure}[H]\label{fig:ardhazard}
   \centering
     \includegraphics[width=0.7\textwidth]{../common/images/arduinowiring.jpg}
-    \caption{Arduino wiring and hazard}
+    \caption{Arduino board and wiring}
 \end{figure}

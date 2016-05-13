@@ -1,21 +1,6 @@
 \section{Tools}
 In this section, we will describe the tools used to create our system.
 
-\subsection{Arduino Controller}
-As said above, we decided to create, thanks to an Arduino Due controller, a "real life" template of our traffic lights system.
-
-We wired LEDs to the boards to imitate the green and red lights of the system. We also added a button for the pedestrians to imitate a real call as we would want to go through a crossroad and another push-button to generate the arrival of a bus in the system. There are also what we call information LEDs that can be lighten up if we arrive in a state that is problematic, or when one call is queuing. 
-We added redundant checking in the controller that checks for example that there is not conflicting green light. In this sense, we took some properties we modelled for the Verification project and we incorporated them into our embedded system.
-
-\begin{figure}[H]
-	\label{fig:arduino}
-  	\centering
-    \includegraphics[width=0.4\textwidth]{picture/arduino.jpg}
-    \caption{Arduino Due used for the embedded system}
-\end{figure} 
-
-To do so, we wrote the code needed for the good functioning of our system in Arduino C.
-
 \subsection{UPPAAL}
 Uppaal is a tool box for validation (via graphical simulation) and verification (via automatic model-checking) of real-time systems. The idea is to model a system using timed automata, as defined in Section \ref{sec:automate}, simulate it and then verify properties that we can define on it. Those automata will be synchronized through channels. Because Uppaal is based on timed automata, clocks will be an important thing in this software. Indeed, the time will be handle thanks to those clocks. We will see that it will be possible to test the value of a clock or even to reset it. Also, clocks will progress in the whole system at the same time.
 \begin{figure}[H]\label{fig:uppaal}

@@ -43,6 +43,31 @@ A[] (not (Crosswalk.Green or Crosswalk.Free) and not( Bus.Green or Bus.Free)) im
 /*
 
 */
+Bus.DelayedCall --> Bus.Green
+
+/*
+
+*/
+Bus.Preempted --> Bus.Green
+
+/*
+
+*/
+Bus.Called --> Bus.Green
+
+/*
+
+*/
+Crosswalk.Preempted --> Crosswalk.Green
+
+/*
+
+*/
+Crosswalk.DelayedCall --> Crosswalk.Green
+
+/*
+
+*/
 Crosswalk.Called --> Crosswalk.Green
 
 /*

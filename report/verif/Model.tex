@@ -5,12 +5,12 @@ To build our final model, we decided to use an incremental way for the construct
 At the end of the day, we did it in 4 different steps. We will now, explain each step without entering into too much detail except for the final step which will be deeply explained.
 
 \subsubsection{Step 1: Basic Traffic Lights system}
-In this first basic step, we created the model in Uppaal of a simple controller sending a pulse every 3 seconds to two cars traffic lights. There is no pedestrians and no buses in this step. \\
-Every 3 seconds, the South and North traffic lights switch from green to red while the East and West traffic lights switch, on the opposite, from red to green. \\
+In this first basic step, we created the model in Uppaal of a simple controller sending a pulse every 3 seconds to the two direction traffic lights. There is no pedestrians and no buses in this step. \\
+Every 3 seconds, the North-South traffic lights switch from green to red while the East-West traffic lights switch, on the opposite, from red to green. \\
 
 Thanks to this basic example, we understood Uppaal basics and notably how it is possible to send messages from one component to an other component thanks to the channel message passing system. \\
 
-In this system, it is possible to check whether our first traffic light is green and the other is red at certain time and vice-versa. Thus we check if we never reach a state where our system is in an impossible and dangerous state where both traffic lights would be green.
+In this system, it is indeed possible to check the safety (whether our first traffic light is green and the other is red at certain time and vice-versa). Thus we check if we never reach a state where our system is in an impossible and dangerous state where both traffic lights would be green.
 
 
 \begin{figure}[H]\label{fig:step1}
@@ -20,15 +20,15 @@ In this system, it is possible to check whether our first traffic light is green
 \end{figure}
 
 \subsubsection{Step 2: Pedestrians}
-In this step, pedestrians were now added and many different things had to be changed to allow accommodate this new change. \\ 
+In this step, pedestrians were added and different things had to be changed to accommodate this new change. \\ 
 
-When a pedestrians call was send by the environment, the car's traffic light that was green had to become red and the other car traffic light had to stay red. When those two traffic lights are red, the pedestrians traffic light could be green. Because we also wanted fairness in our system, two assumptions were here created.
+When a pedestrians call was send by the environment, the car's traffic light that was green had to become red and the other car traffic light had to stay red. When those two traffic lights are red, the pedestrians traffic light could switch tp green. Because we also wanted fairness in our system, two assumptions were added here.
 \begin{enumerate}
     \item When the pedestrians traffic light is green, we have to remember which car traffic light was previously green. This will be useful for the next assumption.
     \item We wanted fairness between the actors, even if pedestrians have the priority. The problem at the beginning was that starvation could happen if, when the pedestrians lights are green, we always switched to a specific car's traffic light. This would mean that the other car's traffic light would remain red if pedestrians are always calling. We thus added what we called a "delayed" call where, even if the pedestrians are always pressing the button, the two cars lights have to be green at least once before the pedestrians could have their lights green again. This is why the first assumption is useful, we have to remember which car's light was previously green so the cars in the other side of the crossroad don't always have to wait 2 times to be green again. \\
     As an example, if the East-West car's traffic light is green and a pedestrian pressed the button, after the pedestrians lights switch from green to red, the North-South car's traffic light is switched to green so they do not have to wait another time.
 \end{enumerate}
-In this step, more properties were checked. We for example check if, after a transition, the value of a component always reaches the enquired value. We also check, as for the first one, that certain states can never be reached in our model (all traffic lights are green for example).
+In this step, more properties were checked. We check if, after a transition, the value of a component always reaches the enquired value. We also check, as for the first one, that certain states can never be reached in our model (all traffic lights are green for example).
 
 \noindent In this step, we also showed thanks to PRISM that our three traffic lights were green with almost the same percentage of time. This can be seen on Figure \ref{fig:prism1}. On this graph, the X-axis represent the average time elapsed between two crosswalk calls while the Y-axis represent the number of times a traffic light is switching to the green state every T (300 in our case) units of time. What we can see is that the more time there is between the pedestrians call, the more our car traffic lights will remain green.
 
@@ -41,7 +41,7 @@ In this step, more properties were checked. We for example check if, after a tra
 
 \subsubsection{Step 3: Buses}
 In this step, we added the buses generated by the environment. The idea here is that the buses have priority on the rest of the traffic. \\
-When a bus is generated, the next traffic light that has to be green is the one of the bus. When the bus is crossing, all other lights are red because the bus will go through all the crossroad. The model can be seen as on Figure \ref{fig:step3bus}. \\
+When a bus is generated, the next traffic light that has to be green is the one of the bus. When the bus is crossing, all other lights are red because the bus will go through. The model can be seen as on Figure \ref{fig:step3bus}. \\
 
 \begin{figure}[H]\label{fig:step3bus}
   \centering
@@ -50,8 +50,17 @@ When a bus is generated, the next traffic light that has to be green is the one 
 \end{figure}
 
 
-\noindent Even if the pedestrians have called to have the green lights before the bus, if a bus is generated between the call and the pedestrians green light, we will first give the green light for the bus, then the pedestrians, then the cars. This mean that the priority hierarchy is \textit{Buses-Pedestrians-Cars}. \\
-This step has also been written in \textbf{PRISM}. Thanks to this complex model, we obtain more specific details about our implementation. We for example could calculate the effect of the time that has elapsed between two buses with as constant the time of a pedestrian call. We also could look at the effect of the time between two pedestrians on the green light of the bus for different time between two buses. \\
+\noindent Even if the pedestrians have called to have the green lights before the bus, if a bus is generated between the call and the pedestrians green light, we will first give the green light to the bus, then the pedestrians, then the cars. This mean that the priority hierarchy is \textit{Buses-Pedestrians-Cars}. \\
+This step has also been written in \textbf{PRISM}. Thanks to this probabilistic model, we obtain more specific details about our implementation. For example, we could calculate the effect of the time that has elapsed between two buses with as constant the time of a pedestrian call. We could also look at the effect of the time between two pedestrians on the green light of the bus for different time between two buses. \\
+
+We choose to have only one dependent variable for each of the graph and fixed the value of the independent variable.
+\begin{itemize}
+	\item FB : the light for the car in the north-south direction,
+	\item LR : the light for the car in the east-west direction,
+	\item CW : the light for the pedestrians,
+	\item BUS : the light for the bus.
+\end{itemize}
+
 
 \begin{figure}[H]\label{fig:cwfirst}
   \centering
@@ -85,7 +94,7 @@ This is thus our final model developed in Uppaal TiGa.
     \caption{Model of the step 4}
 \end{figure}
 
-\subsection{Timed Automatons}
+\subsection{Uppaal Timed Automatons}
 In order to formally model the system, we use several timed automatons from Uppaal. While some of those automatons are actors in the environment, the others are part of the controller.
 The theory tells us that, when the environment is playing, we, humans, cannot decide the action that will be taken. For example, buses and pedestrians arrivals are unpredictable and uncontrollable, so they belong to the environment.
 The actors which implement the solution for avoiding crashes belong to the controller. They interact with the environment in order to avoid crashes and thus they aim to find a winning strategy. \\
@@ -101,18 +110,18 @@ There are several elements that can be seen on Figure 4.8.
     \includegraphics[width=0.9\textwidth]{picture/crosswalk.png}
     \caption{Pedestrians generator}
 \end{figure}
-\noindent It can first be seen that no orange lights are present here. Indeed, as it was a pedestrians traffic lights in Brussels, there is only the red and green light. We thus decided not to add an orange light for this component. \\
-When the environment play, different states can be reaches. The initial state of the pedestrians lights is Red. From this state, three different destinations are possible:
+\noindent We can see that no orange lights are present in \ref{fig:crosswalk}. Indeed, it is a pedestrians traffic lights, and like in Brussels, there is only the red and green light. We thus decided not to add an orange light for this component. \\
+When the environment plays, different states can be reached. The initial state of the pedestrians lights is Red. From this state, three different destinations states are possible:
 \begin{enumerate}
-  \item The Preempted state: A pedestrian call has been made but there is a bus. Since they have total priority, we will first have to wait for the bus to cross the road before we can.
-  \item The DelayedCall state: If there is no bus but the pedestrians already pushed the button within a certain time period, we do not want to give them the green light immediatly, we will thus wait a bit before.
-  \item The Called state: If a call has been made and no conditions from 1 or 2 are present, we go to this state.
+  \item The Preempted state: A pedestrian call has been made but there is a bus. Since they have total priority, we will first have to wait for the bus to cross the road before we can,
+  \item The DelayedCall state: If there is no bus but the pedestrians already pushed the button within a certain time period in the past, we do not give them the green light immediately to stay fair,
+  \item The Called state: If a call has been made and no conditions from 1 or 2 are present, we go to this state. This state means that the pedestrian will get the green light at the end of the current timer.
 \end{enumerate}
-At the end, every state will reach the Preempted one after a short waiting or not. If the road is free, we can put the pedestrians lights to green. After the green state, we reach a free state because, before going back to the red state, different things can happen. Indeed, a bus could arrive and since it has the priority, we will have to give him the next green light. If no bus arrived, we go back to the red state and the basic cars traffic lights will start again. 
+At the end, every other state will reach the Preempted one after having to wait for the end of the timer. We then switch the pedestrians lights to green. After the green state, we reach a free state because, before going back to the red state, different things can happen. Indeed, a bus could arrive and since it has the priority, we will have to give him the next green light. If no bus arrived, we go back to the red state and the basic cars traffic lights will start again. 
 
 \paragraph{Bus} \mbox{}\\
 We will here talk about the mechanisms of our bus generator done in our step 4 from Section \ref{sec:step4}. \\
-As for the pedestrians, four different states can be reached. We still have Preempted, DelayedCall and Called and the meaning is the same than the ones previously defined. A difference here is that, since the bus has priority, if the pedestrians were waiting, we first have to put the bus light to green and this is what we do. The rest follows the same idea as the pedestrians lights.
+As for the pedestrians, four different states can be reached. We still have Preempted, DelayedCall and Called and there meaning is the same than the ones previously defined. for the pedestrians. The only difference here is that, since the bus has priority, if the pedestrians were waiting, we first have to put the bus light to green. The rest follows the same scheme as for pedestrians lights.
 
 \begin{figure}[H]\label{fig:bus}
   \centering

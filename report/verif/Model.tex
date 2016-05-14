@@ -49,16 +49,17 @@ When a bus is generated, the next traffic light that has to be green is the one 
     \caption{Model for the step 3}
 \end{figure}
 
+
 \noindent Even if the pedestrians have called to have the green lights before the bus, if a bus is generated between the call and the pedestrians green light, we will first give the green light for the bus, then the pedestrians, then the cars. This mean that the priority hierarchy is \textit{Buses-Pedestrians-Cars}. \\
 This step has also been written in \textbf{PRISM}. Thanks to this complex model, we obtain more specific details about our implementation. We for example could calculate the effect of the time that has elapsed between two buses with as constant the time of a pedestrian call. We also could look at the effect of the time between two pedestrians on the green light of the bus for different time between two buses. \\
-Those details can be seen on Figure \ref{fig:cw1}, \ref{fig:cw3} and \ref{fig:busbus}.
-\begin{figure}[H]\label{fig:cw1}
+
+\begin{figure}[H]\label{fig:cwfirst}
   \centering
     \includegraphics[width=0.5\textwidth]{picture/CWtime1.png}
     \caption{Effect of time that has elapsed between two buses with pedestrian call = 1 unit of time}
 \end{figure}
 
-\begin{figure}[H]\label{fig:cw3}
+\begin{figure}[H]\label{fig:cwthree}
   \centering
     \includegraphics[width=0.5\textwidth]{picture/CWtime3.png}
     \caption{Effect of time that has elapsed between two buses with pedestrian call = 3 units of time}
@@ -69,6 +70,9 @@ Those details can be seen on Figure \ref{fig:cw1}, \ref{fig:cw3} and \ref{fig:bu
     \includegraphics[width=0.5\textwidth]{picture/CWtimeOnBUS.png}
     \caption{Effect of the time between two pedestrians calls on the bus green light}
 \end{figure}
+
+Those details can be seen on Figure 4.4, 4.5 and 4.6.
+
 
 
 \subsubsection{Step 4: Yellow Light}\label{sec:step4}
@@ -90,7 +94,7 @@ We will now give the implementations explanations of the environment and control
 \subsubsection{Environment}
 \paragraph{Crosswalk} \mbox{}\\
 We will here talk about the mechanisms of our crosswalk generator done in our step 4 from Section \ref{sec:step4}. \\
-There are several elements that can be seen on Figure 4.1.
+There are several elements that can be seen on Figure 4.8.
 
 \begin{figure}[H]\label{fig:crosswalk}
   \centering
@@ -98,19 +102,23 @@ There are several elements that can be seen on Figure 4.1.
     \caption{Pedestrians generator}
 \end{figure}
 \noindent It can first be seen that no orange lights are present here. Indeed, as it was a pedestrians traffic lights in Brussels, there is only the red and green light. We thus decided not to add an orange light for this component. \\
-When the environment play, different states can be reaches. Because we said the bus had total priority, different cases can happen. We will first explain the easiest case that can occur. When there is a call for the light to be green, if no buses are generated, we will reach the waiting state. In this state, we will wait for the cars traffic lights to be red, and when it is the case, the pedestrians light can be green. Of course, it is not that simple, since the buses have priority. Indeed, when the fire is in the red state, a transition going to the preempted state ca happen if there is already a bus. When the bus is gone, then the pedestrians lights can be green.\\
-Another problem can still happen when the call has been made for the pedestrians light to be green. Indeed, if a bus arrives, it must have the priority on the light. This is why we check, until we allowed the green light, if a bus has been generated. If it is the case, we have to wait for the bus to leave the crossroad and then the pedestrians light can be green. \\
-When the green light has to be switched red again, we will first go in a free state where we will check again if another bus has arrived. If an other bus arrives, we let him cross again before releasing the light and then, in any cases (bus or not bus), we go back to the basic red state.
+When the environment play, different states can be reaches. The initial state of the pedestrians lights is Red. From this state, three different destinations are possible:
+\begin{enumerate}
+  \item The Preempted state: A pedestrian call has been made but there is a bus. Since they have total priority, we will first have to wait for the bus to cross the road before we can.
+  \item The DelayedCall state: If there is no bus but the pedestrians already pushed the button within a certain time period, we do not want to give them the green light immediatly, we will thus wait a bit before.
+  \item The Called state: If a call has been made and no conditions from 1 or 2 are present, we go to this state.
+\end{enumerate}
+At the end, every state will reach the Preempted one after a short waiting or not. If the road is free, we can put the pedestrians lights to green. After the green state, we reach a free state because, before going back to the red state, different things can happen. Indeed, a bus could arrive and since it has the priority, we will have to give him the next green light. If no bus arrived, we go back to the red state and the basic cars traffic lights will start again. 
+
 \paragraph{Bus} \mbox{}\\
 We will here talk about the mechanisms of our bus generator done in our step 4 from Section \ref{sec:step4}. \\
+As for the pedestrians, four different states can be reached. We still have Preempted, DelayedCall and Called and the meaning is the same than the ones previously defined. A difference here is that, since the bus has priority, if the pedestrians were waiting, we first have to put the bus light to green and this is what we do. The rest follows the same idea as the pedestrians lights.
 
 \begin{figure}[H]\label{fig:bus}
   \centering
     \includegraphics[width=0.9\textwidth]{picture/bus.png}
     \caption{Buses generator}
 \end{figure}
-
-\noindent This generator follows the same idea as the pedestrians generator. Since there is nothing that has a higher priority than the bus, the model is easier that the one of the pedestrians. We initially start on a red state. If a bus is called (read generated), we wait for the light that is green on the system to be red. When it is the case, the bus light has to be turn to green. We then also check if pedestrians were generated to allow them to have their light green after. \\
 
 \noindent Those were the two actors controlled by the environment.
 

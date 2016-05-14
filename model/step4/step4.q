@@ -1,14 +1,14 @@
-//This file was generated from (Academic) UPPAAL 4.1.4 (rev. 4598), October 2010
+//This file was generated from (Academic) UPPAAL 4.1.4 (rev. 5535), March 2014
 
 /*
 Le temps d'attente pour un Pi\u00e9ton est au plus de 3P (si justeCalled est vrai alors il doit attendre deux feux soit 2P et si un bus est appel\u00e9 avant il faut attendre un feu pour le bus soit 1P) ici on mets 4P parce que il reste jusqu'\u00e0 la fin du 4ieme feu au vert
 */
-A[] not( Crosswalk.Green && Crosswalk.ct>4*P )
+A[] not( Crosswalk.Green && Crosswalk.ct>4*RP )
 
 /*
 Le temps d'attente pour un Pi\u00e9ton est au plus de 2P (si justeCalled est vrai alors il doit attendre deux feux soit 2P) ici on mets 3P parce que il reste jusqu'\u00e0 la fin du 3ieme feu au vert
 */
-A[] not( Bus.Green && Bus.bt>3*P )
+A[] not( Bus.Green && Bus.bt>3*RP )
 
 /*
 Not crosswalk light green and another green at the same time
@@ -28,12 +28,12 @@ A[] not deadlock
 /*
 Le feu redevient vert avant 4P 
 */
-A[] not( TrafficLightFrontBack.Green && TrafficLightFrontBack.tlfbc>4*P )
+A[] not( TrafficLightFrontBack.Green && TrafficLightFrontBack.tlfbc>4*RP )
 
 /*
 Le feu redevient vert avant 4P 
 */
-A[] not( TrafficLightLeftRight.Green && TrafficLightLeftRight.tllrc>4*P )
+A[] not( TrafficLightLeftRight.Green && TrafficLightLeftRight.tllrc>4*RP )
 
 /*
 

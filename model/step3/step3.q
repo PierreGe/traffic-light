@@ -1,4 +1,4 @@
-//This file was generated from (Academic) UPPAAL 4.1.4 (rev. 5535), March 2014
+//This file was generated from (Academic) UPPAAL 4.1.4 (rev. 5648), July 2014
 
 /*
 Le temps d'attente pour un Pi\u00e9ton est au plus de 3P (si justeCalled est vrai alors il doit attendre deux feux soit 2P et si un bus est appel\u00e9 avant il faut attendre un feu pour le bus soit 1P) ici on mets 4P parce que il reste jusqu'\u00e0 la fin du 4ieme feu au vert
@@ -36,11 +36,6 @@ Le feu redevient vert avant 4P
 A[] not( TrafficLightLeftRight.Green && TrafficLightLeftRight.tllrc>4*P )
 
 /*
-if crosswalk and bus are red, one of traffic light are green
-*/
-A[] (not (Crosswalk.Green or Crosswalk.Free) and not( Bus.Green or Bus.Free)) imply  (TrafficLightLeftRight.Green or TrafficLightFrontBack.Green)
-
-/*
 
 */
 Bus.DelayedCall --> Bus.Green
@@ -69,6 +64,16 @@ Crosswalk.DelayedCall --> Crosswalk.Green
 
 */
 Crosswalk.Called --> Crosswalk.Green
+
+/*
+
+*/
+A[] not ( (TrafficLightLeftRight.Green and (Bus.Green or Bus.Free)) or (TrafficLightLeftRight.Green and (Crosswalk.Green or Crosswalk.Free)) or (TrafficLightLeftRight.Green and TrafficLightFrontBack.Green))
+
+/*
+
+*/
+A[] not ( (TrafficLightFrontBack.Green and (Bus.Green or Bus.Free)) or (TrafficLightFrontBack.Green and (Crosswalk.Green or Crosswalk.Free)) or (TrafficLightFrontBack.Green and TrafficLightLeftRight.Green))
 
 /*
 Check if all states verify the follow proprety: If the crosswalk is waiting to be green, a trafficlight cannot be green when the other is in Crosswalk mode and is waiting for the crosswalkLight to be green

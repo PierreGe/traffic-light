@@ -29,14 +29,7 @@ When a pedestrians call was send by the environment, the car's traffic light tha
     As an example, if the East-West car's traffic light is green and a pedestrian pressed the button, after the pedestrians lights switch from green to red, the North-South car's traffic light is switched to green so they do not have to wait another time.
 \end{enumerate}
 In this step, more properties were checked. We check if, after a transition, the value of a component always reaches the enquired value. We also check, as for the first one, that certain states can never be reached in our model (all traffic lights are green for example).
-
-\noindent In this step, we also showed thanks to PRISM that our three traffic lights were green with almost the same percentage of time. This can be seen on Figure \ref{fig:prism1}. On this graph, the X-axis represent the average time elapsed between two crosswalk calls while the Y-axis represent the number of times a traffic light is switching to the green state every T (300 in our case) units of time. What we can see is that the more time there is between the pedestrians call, the more our car traffic lights will remain green.
-
-\begin{figure}[H]\label{fig:prism1}
-  \centering
-    \includegraphics[width=0.5\textwidth]{picture/graphprism.png}
-    \caption{Percentage of green lights between the traffic lights}
-\end{figure}
+In this step, we also showed that our three traffic lights were green with almost the same percentage of time. See \ref{verif:fairness} for more details.
 
 
 \subsubsection{Step 3: Buses}
@@ -51,37 +44,8 @@ When a bus is generated, the next traffic light that has to be green is the one 
 
 
 \noindent Even if the pedestrians have called to have the green lights before the bus, if a bus is generated between the call and the pedestrians green light, we will first give the green light to the bus, then the pedestrians, then the cars. This mean that the priority hierarchy is \textit{Buses-Pedestrians-Cars}. \\
-This step has also been written in \textbf{PRISM}. Thanks to this probabilistic model, we obtain more specific details about our implementation. For example, we could calculate the effect of the time that has elapsed between two buses with as constant the time of a pedestrian call. We could also look at the effect of the time between two pedestrians on the green light of the bus for different time between two buses. \\
 
-We choose to have only one dependent variable for each of the graph and fixed the value of the independent variable.
-\begin{itemize}
-	\item FB : the light for the car in the north-south direction,
-	\item LR : the light for the car in the east-west direction,
-	\item CW : the light for the pedestrians,
-	\item BUS : the light for the bus.
-\end{itemize}
-
-
-\begin{figure}[H]\label{fig:cwfirst}
-  \centering
-    \includegraphics[width=0.5\textwidth]{picture/CWtime1.png}
-    \caption{Effect of time that has elapsed between two buses with pedestrian call = 1 unit of time}
-\end{figure}
-
-\begin{figure}[H]\label{fig:cwthree}
-  \centering
-    \includegraphics[width=0.5\textwidth]{picture/CWtime3.png}
-    \caption{Effect of time that has elapsed between two buses with pedestrian call = 3 units of time}
-\end{figure}
-
-\begin{figure}[H]\label{fig:busbus}
-  \centering
-    \includegraphics[width=0.5\textwidth]{picture/CWtimeOnBUS.png}
-    \caption{Effect of the time between two pedestrians calls on the bus green light}
-\end{figure}
-
-Those details can be seen on Figure 4.4, 4.5 and 4.6.
-
+This step has also been verified for fairness. We calculated the effect of the time that has elapsed between two buses with as constant the time of a pedestrian call. We also looked at the effect of the time between two pedestrians on the green light of the bus for different time between two buses. See \ref{verif:fairness} for more details.
 
 
 \subsubsection{Step 4: Yellow Light}\label{sec:step4}
@@ -136,17 +100,24 @@ As for the pedestrians, four different states can be reached. We still have Pree
 
 In this section, we will present the strategy we implemented for the controller to reach a winning strategy. \\
 
-There are two different cars traffic lights. There is the one we called Left-Right, meaning it represents the East-West lights and the Front-Back representing the North-South crossroad. Since the idea is the same, we will just explain the Left-Right one. It just has to be kwown that the initial state for the Left-Right is the red trafic light while for the other one the initial state is the green one. \\
+As said above, there are two different direction for cars traffic lights. There is the one we called Left-Right, meaning it represents the East-West lights and the Front-Back representing the North-South crossroad. Since the idea is the same, we will just explain the Left-Right one. It just has to be kwown that the initial state for the Left-Right is the red trafic light while for the other one the initial state is the green one. \\
 
 From the red initial state, three different states can be reached:
 \begin{enumerate}
-  \item If a bus has been called, the traffic light has to remain red so the bus can drive through the crosswalk. We thus reach the \textit{Bus} state.
-  \item If pedestrians have pushed the button, we switch to the \textit{Crosswalk} state.
-  \item If no buses or pedestrians were generated and the other cars traffic lights is switching to red, we can reach the \textit{Green} state.
+  \item If a bus has been called, other traffic light has to remain red so the bus can drive through the crosswalk. We thus reach a \textit{Bus} state.
+  \item If pedestrians have pushed the button, we switch to a \textit{Crosswalk} state.
+  \item If no buses or pedestrians were generated and the other cars traffic lights is switching to red, we can reach a \textit{Green} state.
 \end{enumerate}
 
 \subsection{Tested Propreties}
-In this section, we will give and explain the code to formally verify that our system is correct.
+In this section, we will give and explain the code to formally verify that our system is correct. We are going to check :
+\begin{itemize}
+	\item Safety : unwanted system states are never reached (e.g. conflicting green light),
+	\item Liveness : desired behavior eventually happen (e.g. everyone get a green light at some point),
+	\item Fairness : infinitely done requests are infinitely satisfied (nobody will have to wait too long).
+\end{itemize}
+
+The first two have been checked with Uppaal and the last one with Prism.
 
 \subsubsection{Liveness}
 We will first give some liveness properties about our system.
@@ -208,3 +179,51 @@ On the opposite of the first proprety we defined, the liveness one, we will here
   \end{itemize}
 \end{enumerate}
 Thanks to those properties, we could reach a winning strategy where, even if our environment plays, everything will be under control and unfortunate situations will be avoided. In our case, it means that our crosswalk is working the way we want it to work and we were able to prove it thanks to the Verifier from Uppaal.
+
+\subsubsection{Fairness} \label{verif:fairness}
+
+This properties has been checked in \textbf{PRISM}
+
+\paragraph{Crosswalk}
+
+Here we show thanks to PRISM that our three traffic lights are green with almost the same percentage of time. This can be seen on Figure \ref{fig:prism1}. On this graph, the X-axis represent the average time elapsed between two crosswalk calls while the Y-axis represent the number of times a traffic light is switching to the green state every T (300 in our case) units of time. What we can see is that the more time there is between the pedestrians call, the more our car traffic lights will remain green.
+
+\begin{figure}[H]\label{fig:prism1}
+  \centering
+    \includegraphics[width=0.5\textwidth]{picture/graphprism.png}
+    \caption{Percentage of green lights between the traffic lights}
+\end{figure}
+
+\paragraph{Crosswalk and buses}
+
+Here we obtain more specific details about our implementation. For example, we calculate the effect of the time that has elapsed between two buses with as constant the time of a pedestrian call. We also look at the effect of the time between two pedestrians on the green light of the bus for different time between two buses. \\
+
+We choose to have only one dependent variable for each of the graph and fixed the value of the independent variable.
+\begin{itemize}
+	\item FB : the light for the car in the north-south direction,
+	\item LR : the light for the car in the east-west direction,
+	\item CW : the light for the pedestrians,
+	\item BUS : the light for the bus.
+\end{itemize}
+
+
+\begin{figure}[H]\label{fig:cwfirst}
+  \centering
+    \includegraphics[width=0.5\textwidth]{picture/CWtime1.png}
+    \caption{Effect of time that has elapsed between two buses with pedestrian call = 1 unit of time}
+\end{figure}
+
+\begin{figure}[H]\label{fig:cwthree}
+  \centering
+    \includegraphics[width=0.5\textwidth]{picture/CWtime3.png}
+    \caption{Effect of time that has elapsed between two buses with pedestrian call = 3 units of time}
+\end{figure}
+
+\begin{figure}[H]\label{fig:busbus}
+  \centering
+    \includegraphics[width=0.5\textwidth]{picture/CWtimeOnBUS.png}
+    \caption{Effect of the time between two pedestrians calls on the bus green light}
+\end{figure}
+
+Those details can be seen on Figure 4.4, 4.5 and 4.6.
+

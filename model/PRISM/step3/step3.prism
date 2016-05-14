@@ -86,9 +86,10 @@ module crosswalk
 	CWjustCalled : bool init false;
 	CWpedc : bool init false;
 	CWpreemptible : bool init true;
+	CWwaiting : bool init false;
 
 	[change] CWstate = 0 -> (CWjustCalled' = false); // Red  FB LR change
-	[change] CWstate = 2 -> (CWstate'=3); // Called change
+	[change] CWstate = 2 -> (CWstate'=3) & (CWwaiting'=true); // Called change
 	[change] CWstate = 5 -> (CWstate'=6); // DelayedCall change
 	[change] CWstate = 1 -> (CWstate'=4); // Green change
 	[change] BUSstate=2 & CWstate=7 -> (CWstate'=7); // Preempted BUS leave Called
@@ -98,11 +99,11 @@ module crosswalk
 	[pedCall] CWstate = 0 & !CWjustCalled & !BUSbusc -> 1/CWtime : (CWstate'=2) & (CWpedc'=true); // Red pedcall
 	[pedCall] CWstate = 0 & BUSbusc -> 1/CWtime : (CWstate'=7) & (CWpedc'=true) & (CWpreemptible'=false); // Red pedcall
 	[pedCall] CWstate = 6 -> (CWstate'=2); // Return pedCall
-	[pedCall] CWstate = 3 -> (CWstate'=1); // Waiting pedCall
+	[pedCall] CWstate = 3 -> (CWstate'=1) & (CWwaiting'=false); // Waiting pedCall
 
 	[busCall] CWstate = 2 -> (CWstate'=7); // Called busCall
 	[busCall] CWstate = 6 -> (CWstate'=7); // Return busCall
-	[busCall] CWstate = 3 -> (CWstate'=7); // waiting buscall
+	[busCall] CWstate = 3 -> (CWstate'=7) & (CWwaiting'=false); // waiting buscall
 	[busCall] CWstate = 0 -> (CWstate'=0); // Red buscall
 	[busCall] CWstate = 7 -> (CWstate'=7); // Preempted BUS waiting to green
 
@@ -130,9 +131,10 @@ module bus
 	[change] BUSstate = 1 -> (BUSstate'=4); // Green change
 	[change] BUSstate = 8 -> (BUSstate'=8); // CW : CW leave green
 
-	[delayedBusCall] BUSstate=0 & CWpreemptible & BUSjustCalled -> 1/BUStime : (BUSstate'=5) & (BUSbusc'=true);
-	[busCall] BUSstate=0 & CWpreemptible & !BUSjustCalled -> 1/BUStime : (BUSstate'=2) & (BUSbusc'=true); // Red buscall
-	[busCall] BUSstate=0 & !CWpreemptible -> 1/BUStime : (BUSstate'=7) & (BUSbusc'=true); // Red buscall
+	[delayedBusCall] BUSstate=0 & CWpreemptible & BUSjustCalled &!CWwaiting -> 1/BUStime : (BUSstate'=5) & (BUSbusc'=true);
+	[busCall] BUSstate=0 & CWpreemptible & !BUSjustCalled & !CWwaiting -> 1/BUStime : (BUSstate'=2) & (BUSbusc'=true); // Red buscall
+	[busCall] BUSstate=0 & !CWpreemptible & !CWwaiting -> 1/BUStime : (BUSstate'=7) & (BUSbusc'=true); // Red buscall
+	[busCall] BUSstate=0 & CWwaiting -> 1/BUStime : (BUSstate'=1) & (BUSbusc'=true); // Red buscall
 	[busCall] BUSstate=6 & CWpreemptible -> (BUSstate'=2); // Return busscall
 	[busCall] BUSstate=3 -> (BUSstate'=1); // Waiting busscall
 

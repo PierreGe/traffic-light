@@ -16,7 +16,7 @@ We wired those two button to pins which setup to be attached to an interruption.
 
 \subsubsection{ISR}
 
-In our code the Interrupt Service Routine is only setting a volatile boolean to true. We purposely wanted to keep the ISR function as small as possible since it's not possible to interrupt an interruption on an Arduino board. Other interruption during an interruption are simply ignored. That means that is there is a bus call during a pedestrian ISR, the first one would be ignored. That is why we wanted to keep it as small as possible. 
+In our code the Interrupt Service Routine is only setting a volatile boolean to true. We purposely wanted to keep the ISR function as small as possible since it's not possible to interrupt an interruption on an Arduino board. Other interruption during an interruption are simply ignored. That means that if there is a bus call during a pedestrian ISR, the first one would be ignored. That is why we wanted to keep it as small as possible. 
 
 \subsection{From Uppaal to C}
 
@@ -77,7 +77,7 @@ verifier() : OKAY
 
 \subsection{Redundant checker}
 
-We defined a function that check if there is a conflicting state in our system (e.g. conflicting green light). It is called at each transition. If it finds something wrong, it proceeds to turnoff all light except an blinking alert LED.
+We defined a function that check if there is a conflicting state in our system (e.g. conflicting green light). It is called at each transition. If it finds something wrong, it proceeds to turnoff all light except a blinking alert LED.
 
 
 \subsection{Demonstration}

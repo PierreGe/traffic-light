@@ -1,5 +1,5 @@
 \section{Introduction}
-In this section, we are going to discuss about the goal of the project, the different component used, the assumptions made, and the chosen model.
+In this section, we will discuss about the goal of the project, the different components used, the assumptions made, and the model we have chosen.
 
 \subsection{Project}
 
@@ -9,11 +9,11 @@ The goal of the project we choose is to design and implement an embedded system 
 
 For the embedded project, we modelized an environment, and generated a controller based on that model to avoid unwanted situations through winning strategies, all computed with timed games. 
 
-For the formal verification course, a more formal approach was taken. We also had to modelize the system, but also to verify that the model was compliant to some specific properties. 
+For the formal verification course, a more formal approach was taken. We had to modelize the system, but also to verify that the model was compliant to some specific properties. 
 
 \subsection{Hypothesis}
 
-We first had to choose which crossroad will be our template. We strongly took inspiration from the Fraiteur crossroad (Boulevard du triomphe and Beaulieulaan) near Delta metro station. The result of our brainstorming is as follows :
+We first had to choose which crossroad would be our template. We strongly took inspiration from the Fraiteur crossroad (Boulevard du triomphe and Beaulieulaan) near Delta metro station. The result of our brainstorming is as follows :
 
 \begin{figure}[H]\label{fig:crossroad}
 \centering
@@ -34,7 +34,7 @@ We first had to choose which crossroad will be our template. We strongly took in
 
 Before defining the different actors and components in our system, some important hypothesis about our model were made:
 \begin{itemize}
-    \item The different vehicles will respect the Highway Code. This for example means that if a car is turning left and there are car on the opposite direction going straight, the car will stop to let the other pass and will turn after.
+    \item The different vehicles will respect the Highway Code. This for example means that if a car A is turning left and there are car on the opposite direction going straight, the car A will stop to let the other pass and will turn after.
     \item At any time, a pedestrian can push a button to cross the street. There is no priority for pedestrian that would push the button many times in a row.
     \item The pedestrians will cross the street within the given time. This also means that they follow the laws and rules.
     \item All the pedestrians light are connected, that means that when pedestrian can cross, all other lights are red.
@@ -47,25 +47,25 @@ Before defining the different actors and components in our system, some importan
 In this section, the different actors interacting with the system will be reviewed. Those include pedestrians, buses and traffic lights.
 
 \subsubsection{Pedestrians}
-As shown on Figure \ref{fig:crossroad}, there are four different crosswalks in our model. To make a call for the pedestrians to cross, a push button has been implemented on the controller. This means that when one pedestrian has pushed one of the button of the crossroad, the call has been made for all the pedestrians from all  sides. When the call is accepted by the system, the pedestrians can walk freely in the crossroad. All the lights for the cars and the buses have to be red. This also means that if no pedestrians are pushing the button, meaning that no pedestrians are present, their traffic lights will always be red and the cars are able to drive through the crossroad.
+As shown on Figure \ref{fig:crossroad}, there are four sides in the crosswalk of our model. To make a call for the pedestrians to cross, a push button has been implemented on the controller. This means that when one pedestrian has pushed one of the button of the crossroad, the call has been made for all the pedestrians from all  sides. When the call is accepted by the system, the pedestrians can walk freely in the crossroad. All the lights for the cars and the buses have to be red. This also means that if no pedestrians are pushing the button, meaning that no pedestrians are present, their traffic lights will always be red and the cars are able to drive through the crossroad.
 To summarize, when the pedestrians can cross, no other vehicles can. 
 
 \subsubsection{Buses}
-The buses in our model can only go from the south path of the crossroad to the west part of it. Those buses will be automatically detected. A bus have a priority on others actors including pedestrians. This means that when a bus cross, and because it has to go through all the others lanes, all others traffic lights have to be red.
+The buses in our model can only go from the South path of the crossroad to the West part of it. Those buses will be automatically detected. A bus have a priority on others actors including pedestrians. This means that when a bus cross, and because it has to go through all the others lanes, all others traffic lights have to be red.
 
 \subsubsection{Traffic Lights}
-In our Arduino embedded systems, traffic lights can be green or red. We purposely remove the orange light from a common belgian crossroad model because it allows us to avoid having too much cables and LEDs. We consider that when a traffic light is green, cars are going through the crossroad and respect the Highway Code. Therefore cars are not really an actor in our model, we just assume them to pass through the crossroad when their traffic lights are green. 
+In our Arduino embedded systems, traffic lights can be green or red. We purposely remove the orange light from a common belgian crossroad model because it allows us to avoid having too much cables and LEDs. We consider that when a traffic light is green, cars are going through the crossroad and respect the Highway Code. Therefore cars are not really an actor in our model, we just assume them to pass through the crossroad when their traffic lights are green. \\
 
-We want fairness in our system. So for example, even if the pedestrians can always push the button to have the ability to walk through the crosswalk, they have to wait at least that all other traffic lights for the cars have been green once between having two green light. This means that, if no buses come and pedestrians are always pushing the button, the crosswalk with allow the cars of each side to go trough once before the pedestrians can cross again. Thanks to that, each elements in the model can't have only consecutive red light.
+We want fairness in our system. So for example, even if the pedestrians can always push the button to have the ability to walk through the crosswalk, they have to wait at least that all other traffic lights for the cars have been green once between having two green light. This means that, if no buses come and pedestrians are always pushing the button, the crosswalk will allow the cars of each side to go trough once before the pedestrians can cross again. Thanks to that, each elements in the model can't have only consecutive red light.
 
 Another assumption is, like in common belgian crossroad, that when the South light is green, the North light is also green. On the contrary, when the East light is green, the West light is green. In other words, this means that South-North and East-West direction will have synchronized lights.
 
 
 \subsection{Embedded system}
 
-To test our critical system on a real life environment, we decided to implement it with an arduino, with leds and buttons.
+To test our critical system on a real-life environment, we decided to implement it with an Arduino, with leds and buttons.
 
-We believe it to be a nice "real-life" exercise because first, for most of us, it was the first time we build something using a micro-controller. Then as we witness it, micro-controller are subject to external unwanted event, like a inducted current in a cable or a button with a badly made pull-up resistor that create an event that should not have taken place. That forces us to create a strong system that can handle all of that.
+We believe it to be a nice "real-life" exercise because first, for most of us, it was the first time we build something using a micro-controller. Then as we witness it, micro-controller are subject to external unwanted event, like an inducted current in a cable or a button with a badly made pull-up resistor that create an event that should not have taken place. That forces us to create a strong system that can handle all of that.
 
 
 \begin{figure}[H]\label{fig:ardhazard}

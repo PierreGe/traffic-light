@@ -1,8 +1,8 @@
 \section{Model Checking}
 \subsection{Introduction}
-To build our final model, we decided to use an incremental way for the construction, meaning that we started from a Minimum Viable Product that we develop more a little bit more at each step. We  verified each one and, that way, we are assure ourself to have a solid base to continue. Also, that way, we can identify issue more easily.
+To build our final Uppaal model, we decided to use an incremental way for the construction, meaning that we started from a Minimum Viable Product (MVP) that we develop a little bit more at each step. We verified each one and, that way, we could assure ourself to have a solid base for the next step. Thanks to this approach, we could identify possible issues more easily.
 
-At the end of the day, we did it in 4 different steps. We will now, explain each step without entering into too much detail except for the final step which will be deeply explained.
+We finally did it in 4 different steps. We will now, explain each step and do a deep analyze of the last step in the next section.
 
 \subsubsection{Step 1: Basic Traffic Lights system}
 In this first basic step, we created the model in Uppaal of a simple controller sending a pulse every 3 seconds to the two direction traffic lights. There is no pedestrians and no buses in this step. \\
@@ -10,7 +10,7 @@ Every 3 seconds, the North-South traffic lights switch from green to red while t
 
 Thanks to this basic example, we understood Uppaal basics and notably how it is possible to send messages from one component to an other component thanks to the channel message passing system. \\
 
-In this system, it is indeed possible to check the safety (whether our first traffic light is green and the other is red at certain time and vice-versa). Thus we check if we never reach a state where our system is in an impossible and dangerous state where both traffic lights would be green.
+In this system, it is indeed possible to check the safety (whether our first traffic light is green and the other is red at certain time and vice-versa). To do so, we check if we never reach a state where our system is in an incoherent and dangerous state where both traffic lights are green.
 
 
 \begin{figure}[H]\label{fig:step1}

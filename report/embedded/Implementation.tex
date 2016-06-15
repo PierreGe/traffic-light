@@ -1,6 +1,6 @@
 \section{Implementation}
 
-Our system uses input from sensors that inform the controller processor whether a bus or pedestrians are present, and adjust lights accordingly. Therefore, it's a computerized controller in opposition to electromechanical controller in which the logic stands in hardware (dial timer, motor, relays..).
+Our system uses input from sensors that inform the controller processor whether a bus or pedestrians are present, and adjust lights accordingly. Therefore, it is a computerized controller in opposition to electromechanical controller in which the logic stands in hardware (dial timer, motor, relays..).
 
 \subsection{Micro-controller}
 
@@ -16,11 +16,12 @@ We wired those two button to pins which setup to be attached to an interruption.
 
 \subsubsection{ISR}
 
-In our code the Interrupt Service Routine is only setting a volatile Boolean to true. We purposely wanted to keep the ISR function as small as possible since it's not possible to interrupt an interruption on an Arduino board. Other interruptions during an interruption are simply ignored. That means that if there is a bus call during a pedestrian ISR, the first one would be ignored. That is why we wanted to keep it as small as possible. 
+In our code the Interrupt Service Routine is only setting a volatile Boolean to true. We purposely wanted to keep the ISR function as small as possible since it is not possible to interrupt an interruption on an Arduino board. Other interruptions during an interruption are simply ignored. That means that if there is a bus call during a pedestrian ISR, the first one would be ignored. That is why we wanted to keep it as small as possible. 
 
 \subsection{From Uppaal to C}
 
-Thanks to Uppaal, we believe to have a correct theoretical model. We have respected the model to make our C code. We can thus see the state and transition in our C code. Here is an extract of it:
+Thanks to Uppaal, we believe to have a correct theoretical model. We have respected the model to make our C code. We translated the model to the code in a manual fashion. We did not generate it.
+We can thus see the state and transition in our C code. Here is an extract of it:
 
 \begin{verbatim}
 [...]
@@ -47,7 +48,7 @@ void buspathCallISR(){
 
 \subsection{Serial monitor}
 
-To be able to detect hardware problems (e.g. disordered button) and follow the execution of our system, we enabled the Arduino Serial Monitor. Here is an example of an execution trace :
+To be able to detect hardware problems (e.g. pull-up resistance on button problem) and follow the execution of our system, we enabled the Arduino Serial Monitor. Here is an example of an execution trace :
 
 \begin{verbatim}
 ========= RESET =========
@@ -78,11 +79,13 @@ verifier() : OKAY
 \subsection{Redundant checker}
 
 We defined a function that check if there is a conflicting state in our system (e.g. conflicting green lights). It is called at each transition. If it finds something wrong, it proceeds to turnoff all light except a blinking alert LED.
+Even if we are sure that our model is correct, the implementation can introduce some error, for exemple a state transition that forget to give the order to send current to a led pin.
+The advantage of this verification is that it is able to check the pin value itself, so it checks that no conflicting pin value have been introduced during the translation in code. 
 
 
 \subsection{Demonstration}
 
-Here is a 2 minutes video that shows what we implemented better than a thousand words description would.
+Here is a 2 minutes video that shows what we have implemented better than words would.
 
 \begin{figure}[H]\label{fig:ytv}
   \centering

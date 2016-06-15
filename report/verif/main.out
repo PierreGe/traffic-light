@@ -1,0 +1,30 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Project}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Hypothesis}{section.1}% 3
+\BOOKMARK [2][-]{subsection.1.3}{Actors}{section.1}% 4
+\BOOKMARK [3][-]{subsubsection.1.3.1}{Pedestrians}{subsection.1.3}% 5
+\BOOKMARK [3][-]{subsubsection.1.3.2}{Buses}{subsection.1.3}% 6
+\BOOKMARK [3][-]{subsubsection.1.3.3}{Traffic Lights}{subsection.1.3}% 7
+\BOOKMARK [2][-]{subsection.1.4}{Embedded system}{section.1}% 8
+\BOOKMARK [1][-]{section.2}{Concepts}{}% 9
+\BOOKMARK [2][-]{subsection.2.1}{Timed Automata}{section.2}% 10
+\BOOKMARK [2][-]{subsection.2.2}{Temporal Logic and Properties}{section.2}% 11
+\BOOKMARK [2][-]{subsection.2.3}{Game Theory and Timed Games}{section.2}% 12
+\BOOKMARK [1][-]{section.3}{Tools}{}% 13
+\BOOKMARK [2][-]{subsection.3.1}{UPPAAL}{section.3}% 14
+\BOOKMARK [2][-]{subsection.3.2}{UPPAAL TiGa}{section.3}% 15
+\BOOKMARK [2][-]{subsection.3.3}{PRISM}{section.3}% 16
+\BOOKMARK [1][-]{section.4}{Model Checking}{}% 17
+\BOOKMARK [2][-]{subsection.4.1}{Introduction}{section.4}% 18
+\BOOKMARK [3][-]{subsubsection.4.1.1}{Step 1: Basic Traffic Lights system}{subsection.4.1}% 19
+\BOOKMARK [3][-]{subsubsection.4.1.2}{Step 2: Pedestrians}{subsection.4.1}% 20
+\BOOKMARK [3][-]{subsubsection.4.1.3}{Step 3: Buses}{subsection.4.1}% 21
+\BOOKMARK [3][-]{subsubsection.4.1.4}{Step 4: Yellow Light}{subsection.4.1}% 22
+\BOOKMARK [2][-]{subsection.4.2}{Uppaal Timed Automatons}{section.4}% 23
+\BOOKMARK [3][-]{subsubsection.4.2.1}{Environment}{subsection.4.2}% 24
+\BOOKMARK [3][-]{subsubsection.4.2.2}{Controller}{subsection.4.2}% 25
+\BOOKMARK [2][-]{subsection.4.3}{Tested Propreties}{section.4}% 26
+\BOOKMARK [3][-]{subsubsection.4.3.1}{Liveness}{subsection.4.3}% 27
+\BOOKMARK [3][-]{subsubsection.4.3.2}{Safety}{subsection.4.3}% 28
+\BOOKMARK [3][-]{subsubsection.4.3.3}{Fairness}{subsection.4.3}% 29
+\BOOKMARK [1][-]{section.5}{Conclusion}{}% 30

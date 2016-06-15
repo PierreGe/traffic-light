@@ -1,10 +1,10 @@
 \section{Implementation}
 
-Our system uses input from sensors that inform the controller processor whether bus or other pedestrian are present, and adjust light accordingly. Therefore, it's a computerized controller in opposition to electromechanical controller in which the logic stands in hardware (dial timer, motor, relays..).
+Our system uses input from sensors that inform the controller processor whether a bus or pedestrians are present, and adjust lights accordingly. Therefore, it's a computerized controller in opposition to electromechanical controller in which the logic stands in hardware (dial timer, motor, relays..).
 
 \subsection{Micro-controller}
 
-We had at our disposition Arduino Uno, Arduino Due, Arduino Yun and Intel Galileo board. We choose the Arduino Due because we feared than we might need more I/O pins than other board provide (but in the end it was not the case).	 Nevertheless, the biggest advantage the Arduino Due provides is that it can deliver way more power on the pin. Thanks to that last advantage, we did not need to use relays and an external power alimentation.
+We had at our disposition Arduino Uno, Arduino Due, Arduino Yun and Intel Galileo board. We choose the Arduino Due because we feared than we might need more I/O pins than other board provide (but in the end it was not the case). Nevertheless, the biggest advantage the Arduino Due provides is that it can deliver way more power on the pin. Thanks to that last advantage, we did not need to use relays and an external power supply.
 
 \subsection{Environment input}
 
@@ -16,11 +16,11 @@ We wired those two button to pins which setup to be attached to an interruption.
 
 \subsubsection{ISR}
 
-In our code the Interrupt Service Routine is only setting a volatile boolean to true. We purposely wanted to keep the ISR function as small as possible since it's not possible to interrupt an interruption on an Arduino board. Other interruption during an interruption are simply ignored. That means that if there is a bus call during a pedestrian ISR, the first one would be ignored. That is why we wanted to keep it as small as possible. 
+In our code the Interrupt Service Routine is only setting a volatile Boolean to true. We purposely wanted to keep the ISR function as small as possible since it's not possible to interrupt an interruption on an Arduino board. Other interruptions during an interruption are simply ignored. That means that if there is a bus call during a pedestrian ISR, the first one would be ignored. That is why we wanted to keep it as small as possible. 
 
 \subsection{From Uppaal to C}
 
-Thanks to Uppaal, we believe to have a correct theoretical model. We have respected the model to make our C code. Thus we can see the state and transition in our C code. Here is extract:
+Thanks to Uppaal, we believe to have a correct theoretical model. We have respected the model to make our C code. We can thus see the state and transition in our C code. Here is an extract of it:
 
 \begin{verbatim}
 [...]
@@ -47,7 +47,7 @@ void buspathCallISR(){
 
 \subsection{Serial monitor}
 
-To be able to detect hardware problems (e.g. desoldered button) and follows the execution of our system, we enabled the Arduino Serial Monitor. Here is an example of a backtrace :
+To be able to detect hardware problems (e.g. disordered button) and follow the execution of our system, we enabled the Arduino Serial Monitor. Here is an example of an execution trace :
 
 \begin{verbatim}
 ========= RESET =========
@@ -77,7 +77,7 @@ verifier() : OKAY
 
 \subsection{Redundant checker}
 
-We defined a function that check if there is a conflicting state in our system (e.g. conflicting green light). It is called at each transition. If it finds something wrong, it proceeds to turnoff all light except a blinking alert LED.
+We defined a function that check if there is a conflicting state in our system (e.g. conflicting green lights). It is called at each transition. If it finds something wrong, it proceeds to turnoff all light except a blinking alert LED.
 
 
 \subsection{Demonstration}
